@@ -28,8 +28,8 @@ Description
     by affinitizing the running thread, I'm working currently
     working on.
 
-    All of this information can be derived on nix system using sysctl,
-    e.g sysctl hw and machdep
+    A lot of this information can be derived on nix systems
+    (linux?) using sysctl, examples:
         hw.ncpu
         hw.physicalcpu
         hw.physicalcpu_max
@@ -39,9 +39,6 @@ Description
         machdep.cpu.cores_per_package
         machdep.cpu.core_count
         machdep.cpu.thread_count
-
-
-
 
 Compiling
 ---------
