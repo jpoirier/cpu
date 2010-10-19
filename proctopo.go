@@ -17,7 +17,7 @@ type ProcTopo_t struct {
 	CpuidRestricted bool
 	HttSupported    bool
 	Vendor          string
-	MaxCpus         int
+	MaxProc         uint32
 	OSProcCnt       uint32
 	PkgCntEnum      uint32
 	CoreCntEnum     uint32
@@ -35,13 +35,13 @@ type regs struct {
 }
 
 // Onln returns the number of logical processors that are on line.
-func Onln() int {
-	return int(C.onln())
+func Onln() uint32 {
+	return uint32(C.onln())
 }
 
 // Conf returns the maximum number of logical processors supported by the OS.
-func Conf() int {
-	return int(C.conf())
+func Conf() uint32 {
+	return uint32(C.conf())
 }
 
 // have_cpuid returns whether or not the cpuid instruction exists
@@ -68,7 +68,8 @@ func utos(a uint32) string {
 
 // cpuParams
 func cpuParams(s *ProcTopo_t) bool {
-	s.MaxCpus = Conf()
+	s.PkgCntEnum = 1
+	s.MaxProc = Conf()
 
 	//----------------------------
 	// cpuid check
@@ -106,10 +107,30 @@ func cpuParams(s *ProcTopo_t) bool {
 		s.HttSupported = true
 	}
 
+	//----------------------------
+	// physical and logical core cnt
+	//----------------------------
+	var logCoreCnt uint32 = r.ebx >> 16 & 0xFF
+	var phyCoreCnt uint32
+	if s.Vendor == "GenuineIntel" {
+		cpuid(&r, 4, 0)
+		phyCoreCnt = (r.eax >> 26 & 0x3F) + 1
+	} else if s.Vendor == "AuthenticAMD" {
+		cpuid(&r, 0x80000008, 0)
+		phyCoreCnt = (r.ecx & 0xFF) + 1
+	} else {
+		s.Error = true
+		return false
+	}
+	s.PkgCntEnum = s.MaxProc - logCoreCnt + 1 // wrong? symmetrical for multiple packages ?
+	s.CoreCntEnum = phyCoreCnt
+	s.ThreadCntEnum = logCoreCnt
+	s.HttSmtPerPkg = logCoreCnt - phyCoreCnt
+	if logCoreCnt > phyCoreCnt { s.HttSmtPerCore = 1 /* always 1? */ }
 	return true
 }
 
 // ProcTopo
 func ProcTopo(s *ProcTopo_t) {
-	stat := cpuParams(s)
+	cpuParams(s)
 }

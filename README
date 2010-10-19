@@ -2,21 +2,29 @@ Description
 ------------
     reports processor topology
 
-    currently reports:
+    currently reports (see main.go):
         - if the cpuid instruction is present
         - if cpuid execution is restricted
         - if Hyper-Threading Technology is supported
         - maximum number of processors supported by the OS
         - number of processors on line
         - Vendor name
-
-    todo:
         - report OS process count
         - report total package count
         - report total core count
         - report total thread count
         - report HTT per core count
         - report HTT per package count
+
+    The package count calculation probably isn't correct.
+    It assumes that we can calculate the physical package
+    count by dividing the the maximum processor count by
+    the logical processor count of the package the thread
+    is running on and that the configuration is symmetrical.
+
+    The ideal way to calculate package/core/thread count
+    is to iterate through the system by affinitizing the
+    thread.
 
 Compiling
 ---------
@@ -37,7 +45,18 @@ Examples
 
 Misc
 ----
-
+- Package refers to a physical processor that plugs in to a socket
+- Core refers to a physical sub-system of a package. A core may contain 1 or more
+  logical processors
+- A logical processor refers to a hardware resource that can execute a single thread
+- Hyperthreading refers to the technology that allows a processor core to provide the
+  functionality of more than one logical core
+- Simultaneous Multi-Threading refers
+- Multi-Core Processor contains more than one physical core
+- MultiProcessor Platform contains multiple physical sockets
+- Hardware Multithreading refers to any combination of hardware support to allow
+  multithreading, which could be any combination of SMT, multi-core, and multi-processor
+- Processor Topology is the hierarchical relationship of shared vs dedicated hadrware resources
 
 TODO
 ----

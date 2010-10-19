@@ -17,7 +17,7 @@ typedef struct {
 
 extern bool have_cpuid(void);
 extern void cpuid(regs_t* r, uint32_t f1, uint32_t f2);
-extern int conf(void);
-extern int onln(void);
+extern uint32_t conf(void);
+extern uint32_t onln(void);
 
 #endif // PROCTOPO_H
