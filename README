@@ -11,7 +11,7 @@ Description
         - Vendor name
 
     todo:
-        - report OS processes count
+        - report OS process count
         - report total package count
         - report total core count
         - report total thread count
