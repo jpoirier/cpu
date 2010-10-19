@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("\nAn OS views threads as logical processors in a hardware multi-threading environment.")
+	fmt.Println("\nAn OS views physical cores and hardware threads as logical processors \nin a multi-package, multi-core, multi-threading environment.")
 	fmt.Println("error             : ", cpu.Error)
 	fmt.Println("cpuid present     : ", cpu.CpuidPresent)
 	fmt.Println("cpuid restricted  : ", cpu.CpuidRestricted)
