@@ -103,8 +103,6 @@ bool have_cpuid(void) {
 
 //
 void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
-//    regs_t r;
-
     __asm__ __volatile__ (
         "mov %4, %%eax\n\t"
         "mov %5, %%ecx\n\t"
