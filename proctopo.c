@@ -33,13 +33,13 @@
         No:
             core cnt is 1
 
-r.ebx: 0x756E6547  uneG
-r.ecx: 0x6C65746E  letn
-r.edx: 0x49656E69  Ieni
+    r.ebx: 0x756E6547  uneG
+    r.ecx: 0x6C65746E  letn
+    r.edx: 0x49656E69  Ieni
 
-r.ebx: 0x68747541  htuA
-r.ecx: 0x444D4163  DMAc
-r.edx: 0x69746E65  itne
+    r.ebx: 0x68747541  htuA
+    r.ecx: 0x444D4163  DMAc
+    r.edx: 0x69746E65  itne
 */
 
 #if defined(__386__) && !defined(__AMD64__)
@@ -128,7 +128,7 @@ int onln(void) {
 #endif
 }
 
-//  Number of configured processors
+//  Number of OS configured processors
 int conf(void) {
 #if defined(__WINDOWS__)
 	SYSTEM_INFO sysinfo;
@@ -138,110 +138,3 @@ int conf(void) {
 	return sysconf(_SC_NPROCESSORS_CONF);
 #endif
 }
-
-#ifdef DO_MAIN
-#include <stdio.h>
-
-int main(int argc, char* argv[]) {
-
-    int f = have_cpuid();
-
-    if (!f) {
-        printf("no executable cpuid\n");
-        return 0;
-    }
-
-    regs_t r;
-    //----------
-    // max cpuid and vendor name
-    //----------
-    cpuid(&r, 0, 0);
-
-    uint32_t max_cpuid = r.eax;
-	printf("max_cpuid: %d\n", max_cpuid);
-
-    char vendor[12];
-//  why doesn't this work?
-//	sprintf(vendor, "%.4s%.4s%.4s", (char*) &r.ebx, (char*) &r.edx,  (char*) &r.ecx);
-
-    // actual string
-	sprintf(&vendor[0], "%.4s", (char*) &r.ebx);
-	sprintf(&vendor[4], "%.4s", (char*) &r.edx);
-	sprintf(&vendor[8], "%.4s", (char*) &r.ecx);
-	printf("%.12s\n", vendor);
-
-    // show AMD string
-//	sprintf(&vendor[0], "%.4s", (char*) &AmdId[0]);
-//	sprintf(&vendor[4], "%.4s", (char*) &AmdId[2]);
-//	sprintf(&vendor[8], "%.4s", (char*) &AmdId[1]);
-//	printf("%.12s\n", vendor);
-
-    int ven = 0;
-    if (r.ebx == IntelId[0] && r.ecx == IntelId[1] && r.edx == IntelId[2]) {
-        ven = VEN_INTEL;
-    } else if (r.ebx == AmdId[0] && r.ecx == AmdId[1] && r.edx == AmdId[2]) {
-        ven = VEN_AMD;
-    }
-
-    //----------
-    // check for restricted cpuid execution
-    //----------
-    int cpuid_restricted = false;
-    cpuid(&r, 0x80000000, 0);
-//    uint32_t max_cpuid_ext = r.eax;
-
-	if ( max_cpuid <= 4 && r.eax > 0x80000004) {
-        cpuid_restricted = true;
-        printf("cpuid execution restricted...\n");
-    }
-
-    //----------
-    // HTT enabled/present
-    //----------
-    int htt_enabled = 0;
-    cpuid(&r, 1, 0);
-    if (r.edx & HTT_BIT) {
-        htt_enabled = true;
-        printf("HTT available\n");
-    } else {
-// but we can check for multiple hardware packages
-        printf("HTT not available\n");
-        return;
-    }
-
-//    uint32_t logical_proc_cnt = ((r.ebx >> 16) & 0xFF);
-//       printf("logical_proc_cnt: %d\n", logical_proc_cnt);
-
-/*
-    cpuid(&r, 1, 0)
-    if !htt_enabled
-        single core
-
-    int has_b_leaf
-    if max_cpuid >= 0x0B
-        cpuid(&r, 0x0B, 0)
-        has_b_leaf = (r.ebx != 0)
-
-    if has_b_leaf
-
-    if !has_b_leaf
-*/
-
-//    switch (ven) {
-//        case VEN_INTEL:
-//            printf("vendor: Intel\n");
-//            r = cpuid(4);
-//            cores += ((r.ebx >> 26) & 0x3F);
-//            break;
-//        case VEN_AMD:
-//            printf("vendor: AMD\n");
-//            r = cpuid(0x80000008);
-//            cores += (r.ecx & 0xFF);
-//            break;
-//        default:
-//            break;
-//    }
-
-//	printf("cores: %d\n", cores);
-}
-#endif

@@ -15,6 +15,7 @@ func main() {
 	fmt.Println("cpuid present     : ", s.CpuidPresent)
 	fmt.Println("cpuid restricted  : ", s.CpuidRestricted)
 	fmt.Println("htt supported     : ", s.HttSupported)
-	fmt.Println("Max CPUs          : ", s.MaxCpus)
+	fmt.Println("Max processors    : ", s.MaxCpus) // also via proctopo.Conf()
+	fmt.Println("Processors on line: ", proctopo.Onln())
 	fmt.Println("vendor            : ", s.Vendor)
 }

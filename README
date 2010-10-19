@@ -1,6 +1,22 @@
 Description
 ------------
+    reports processor topology
 
+    currently only reports:
+        - if the cpuid instruction is present
+        - if cpuid execution is restricted
+        - if Hyper-Threading Technology is supported
+        - maximum number of processors supported by the OS
+        - number processors on line
+        - Vendor name
+
+    todo:
+        - report OS processes count
+        - report total package count
+        - report total core count
+        - report total thread count
+        - report HTT per core count
+        - report HTT per package count
 
 Compiling
 ---------
@@ -26,5 +42,5 @@ Misc
 TODO
 ----
 - add error enumerations
-- handle no windows systems that don't have _SC_NPROCESSORS_ONLN and _SC_NPROCESSORS_CONF
-- if 64-bit or new 32-bit and leaf vale < 4 check IA32_MISC_ENABLES bit 22
+- handle non-windows systems that don't have _SC_NPROCESSORS_ONLN and _SC_NPROCESSORS_CONF
+- if 64-bit, or newer 32-bit, and leaf value < 4 check IA32_MISC_ENABLES bit 22
