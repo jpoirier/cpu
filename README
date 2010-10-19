@@ -2,7 +2,7 @@ Description
 ------------
     reports processor topology
 
-    currently only reports:
+    currently reports:
         - if the cpuid instruction is present
         - if cpuid execution is restricted
         - if Hyper-Threading Technology is supported
