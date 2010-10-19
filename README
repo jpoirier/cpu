@@ -7,7 +7,7 @@ Description
         - if cpuid execution is restricted
         - if Hyper-Threading Technology is supported
         - maximum number of processors supported by the OS
-        - number processors on line
+        - number of processors on line
         - Vendor name
 
     todo:
