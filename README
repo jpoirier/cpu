@@ -16,20 +16,36 @@ Description
         - report HTT per core count
         - report HTT per package count
 
-    The package count calculation probably isn't correct.
-    It assumes that we can calculate the physical package
-    count by dividing the the maximum processor count by
-    the logical processor count of the package the thread
-    is running on and that the configuration is symmetrical.
+    For multi-package system the package count calculation
+    probably isn't correct at the moment. It assumes that the
+    physical package count can be derived by dividing the the
+    maximum processor count by the logical processor count of
+    the package that the thread is running on, and that the
+    configuration is symmetrical.
 
-    The ideal way to calculate package/core/thread count
-    is to iterate through the system by affinitizing the
-    thread.
+    The ideal way to calculate the package/core/thread count
+    for multi-package systems is to iterate through the system
+    by affinitizing the running thread, I'm working currently
+    working on.
+
+    All of this information can be derived on nix system using sysctl,
+    e.g sysctl hw and machdep
+        hw.ncpu
+        hw.physicalcpu
+        hw.physicalcpu_max
+        hw.logicalcpu
+        hw.logicalcpu_max
+        machdep.cpu.logical_per_package
+        machdep.cpu.cores_per_package
+        machdep.cpu.core_count
+        machdep.cpu.thread_count
+
+
+
 
 Compiling
 ---------
     make install - builds and installs the package
-
 
 Testing
 -------
@@ -37,11 +53,11 @@ Testing
 
 Usage
 -----
-
+    see main.go
 
 Examples
 --------
-
+    see main.go
 
 Misc
 ----
@@ -62,4 +78,4 @@ TODO
 ----
 - add error enumerations
 - handle non-windows systems that don't have _SC_NPROCESSORS_ONLN and _SC_NPROCESSORS_CONF
-- if 64-bit, or newer 32-bit, and leaf value < 4 check IA32_MISC_ENABLES bit 22
+- if 64-bit, or newer 32-bit, and the leaf value is less than 4 check IA32_MISC_ENABLES bit 22
