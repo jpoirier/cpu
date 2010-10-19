@@ -2,9 +2,9 @@
 // Distributable under the terms of The New BSD License
 // that can be found in the LICENSE file.
 
-package proctopo
+package cpu
 
-// #include "proctopo.h"
+// #include "cpu.h"
 import "C"
 
 import (

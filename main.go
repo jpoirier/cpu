@@ -5,23 +5,23 @@
 package main
 
 import (
-	"proctopo"
+	"cpu"
 	"fmt"
 )
 
 func main() {
 	fmt.Println("\nAn OS views threads as logical processors in a hardware multi-threading environment.")
-	fmt.Println("error             : ", proctopo.Error)
-	fmt.Println("cpuid present     : ", proctopo.CpuidPresent)
-	fmt.Println("cpuid restricted  : ", proctopo.CpuidRestricted)
-	fmt.Println("htt supported     : ", proctopo.HttSupported)
-	fmt.Println("OS processors     : ", proctopo.OSProcCnt) // also via proctopo.Onln()
-	fmt.Println("max processors    : ", proctopo.MaxProc)   // also via proctopo.Conf()
-	fmt.Println("package count     : ", proctopo.PkgCntEnum)
-	fmt.Println("core count        : ", proctopo.CoreCntEnum)
-	fmt.Println("thread count      : ", proctopo.ThreadCntEnum)
-	fmt.Println("htt/smt per core  : ", proctopo.HttSmtPerCore)
-	fmt.Println("htt/smt per pkg   : ", proctopo.HttSmtPerPkg)
-	fmt.Println("processors on line: ", proctopo.Onln())
-	fmt.Println("vendor            : ", proctopo.Vendor)
+	fmt.Println("error             : ", cpu.Error)
+	fmt.Println("cpuid present     : ", cpu.CpuidPresent)
+	fmt.Println("cpuid restricted  : ", cpu.CpuidRestricted)
+	fmt.Println("htt supported     : ", cpu.HttSupported)
+	fmt.Println("OS processors     : ", cpu.OSProcCnt) // also via cpu.Onln()
+	fmt.Println("max processors    : ", cpu.MaxProc)   // also via cpu.Conf()
+	fmt.Println("package count     : ", cpu.PkgCntEnum)
+	fmt.Println("core count        : ", cpu.CoreCntEnum)
+	fmt.Println("thread count      : ", cpu.ThreadCntEnum)
+	fmt.Println("htt/smt per core  : ", cpu.HttSmtPerCore)
+	fmt.Println("htt/smt per pkg   : ", cpu.HttSmtPerPkg)
+	fmt.Println("processors on line: ", cpu.Onln())
+	fmt.Println("vendor            : ", cpu.Vendor)
 }

@@ -11,7 +11,7 @@
 #error "Invalid GOOS: must be darwin, freebsd, linux, or windows"
 #endif
 
-#include "proctopo.h"
+#include "cpu.h"
 
 /*
     - check if cpuid is executable

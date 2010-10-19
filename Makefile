@@ -1,8 +1,8 @@
 include $(GOROOT)/src/Make.inc
-TARG=proctopo
+TARG=cpu
 
 CGOFILES=\
-	proctopo.go
+	cpu.go
 
 LDPATH_freebsd=-Wl,-R,`pwd`
 LDPATH_linux=-Wl,-R,`pwd`
@@ -34,17 +34,17 @@ $(error Invalid $$GOARCH '$(GOARCH)'; must be 386 or amd64)
 endif
 
 
-CGO_LDFLAGS=proctopo.so $(LDPATH_$(GOOS))
-CGO_DEPS=proctopo.so
+CGO_LDFLAGS=cpu.so $(LDPATH_$(GOOS))
+CGO_DEPS=cpu.so
 
 CLEANFILES +=main$(EXT)
 include $(GOROOT)/src/Make.pkg
 
-proctopo.o: proctopo.c
-	gcc $(_CGO_CFLAGS_$(GOARCH)) -g -c -fPIC $(CFLAGS) proctopo.c
+cpu.o: cpu.c
+	gcc $(_CGO_CFLAGS_$(GOARCH)) -g -c -fPIC $(CFLAGS) cpu.c
 
-proctopo.so: proctopo.o
-	gcc $(_CGO_CFLAGS_$(GOARCH)) -o $@ proctopo.o $(_CGO_LDFLAGS_$(GOOS))
+cpu.so: cpu.o
+	gcc $(_CGO_CFLAGS_$(GOARCH)) -o $@ cpu.o $(_CGO_LDFLAGS_$(GOOS))
 
 main: install main.go
 	$(GC) main.go
