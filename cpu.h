@@ -2,8 +2,8 @@
 // Distributable under the terms of The New BSD License
 // that can be found in the LICENSE file.
 
-#ifndef PROCTOPO_H
-#define PROCTOPO_H
+#ifndef CPU_H
+#define CPU_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,4 +20,4 @@ extern void cpuid(regs_t* r, uint32_t f1, uint32_t f2);
 extern uint32_t conf(void);
 extern uint32_t onln(void);
 
-#endif // PROCTOPO_H
+#endif // CPU_H

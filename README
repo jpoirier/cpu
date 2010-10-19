@@ -1,6 +1,6 @@
 Description
 ------------
-    reports processor topology
+    cpu package reports processor topology
 
     currently reports (see main.go):
         - if the cpuid instruction is present
