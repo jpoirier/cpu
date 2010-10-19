@@ -49,17 +49,6 @@
 uint32_t eflg_chks[2] = {CHK_386, CHK_486};
 #endif
 
-#define HTT_BIT (1 << 28)
-#define NUM_LOGCORE_BITS (0xFF << 16)
-#define NUM_MAXCORE_BITS (0xFC << 26)
-#define VEN_INTEL 1
-#define VEN_AMD 2
-
-
-// ebx, ecx, edx  GenuineIntel and AuthenticAMD
-static const uint32_t  IntelId[3] = {0x756E6547, 0x6C65746E, 0x49656E69};
-static const uint32_t AmdId[3] = {0x68747541, 0x444D4163, 0x69746E65};
-
 //
 bool have_cpuid(void) {
 #if defined(__386__) && !defined(__AMD64__)
@@ -73,10 +62,8 @@ bool have_cpuid(void) {
     */
     uint32_t a, b:
     int32_t j, i;
-
     for (i = 0; i < 2; i++) {
         j = eflg_chks[i];
-
         __asm__ __volatile__ (
             "pushfl\n\t"
             "popl %%eax\n\t"
@@ -93,7 +80,6 @@ bool have_cpuid(void) {
             : "r"(j)
             : "eax"
         );
-
         if ((a & j) != (b & j)
             return false;
     }

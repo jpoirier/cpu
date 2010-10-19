@@ -92,7 +92,7 @@ func cpuParams(s *ProcTopo_t) bool {
 	var r regs
 	s.CpuidRestricted = false
 	cpuid(&r, 0x80000000, 0)
-	if maxCpuid <= 4 && r.eax > 0x80000004 {
+	if maxCpuid<=4 && r.eax>0x80000004 {
 		s.CpuidRestricted = true
 		return false
 	}
@@ -102,7 +102,7 @@ func cpuParams(s *ProcTopo_t) bool {
 	//----------------------------
 	s.HttSupported = false
 	cpuid(&r, 1, 0)
-	if ((r.edx>>28)&1) != 0 {
+	if r.edx>>28&1 != 0 {
 		s.HttSupported = true
 	}
 
@@ -111,5 +111,5 @@ func cpuParams(s *ProcTopo_t) bool {
 
 // ProcTopo
 func ProcTopo(s *ProcTopo_t) {
-	cpuParams(s)
+	stat := cpuParams(s)
 }
