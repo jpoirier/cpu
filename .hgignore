@@ -1,0 +1,12 @@
+syntax:glob
+.DS_Store
+.git
+.gitignore
+*.ao
+*.so
+*.pyc
+._*
+_obj
+_test
+
+

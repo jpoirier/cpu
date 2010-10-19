@@ -1,0 +1,247 @@
+// Copyright (c) 2010 Joseph D Poirier
+// Distributable under the terms of The New BSD License
+// that can be found in the LICENSE file.
+
+#if defined(__WINDOWS__)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#elif defined(__LINUX__) || defined(__DARWIN__) || defined(__FREEBSD__)
+#include <unistd.h>
+#else
+#error "Invalid GOOS: must be darwin, freebsd, linux, or windows"
+#endif
+
+#include "proctopo.h"
+
+/*
+    - check if cpuid is executable
+        Yes:
+            - CPUID 0:
+                    Vendor Information: EBX ECX EDX
+                    GenuineIntel or AuthenticAMD
+            - CPUID 1:
+                    EDX[28]     : HTT enabled
+                    EBX[23:16]  : logical core count
+
+            - Logical core count:
+                if GenuineIntel:
+                    CPUID 4:
+                        EAX[31:26] -> value + 1
+                if AuthenticAMD
+                    CPUID 0x80000008:
+                        ECX[7:0]
+        No:
+            core cnt is 1
+
+r.ebx: 0x756E6547  uneG
+r.ecx: 0x6C65746E  letn
+r.edx: 0x49656E69  Ieni
+
+r.ebx: 0x68747541  htuA
+r.ecx: 0x444D4163  DMAc
+r.edx: 0x69746E65  itne
+*/
+
+#if defined(__386__) && !defined(__AMD64__)
+/* eflag register checks, upper and lower boundaries */
+#define CHK_386 (0x040000)
+#define CHK_486 (0x200000)
+uint32_t eflg_chks[2] = {CHK_386, CHK_486};
+#endif
+
+#define HTT_BIT (1 << 28)
+#define NUM_LOGCORE_BITS (0xFF << 16)
+#define NUM_MAXCORE_BITS (0xFC << 26)
+#define VEN_INTEL 1
+#define VEN_AMD 2
+
+
+// ebx, ecx, edx  GenuineIntel and AuthenticAMD
+static const uint32_t  IntelId[3] = {0x756E6547, 0x6C65746E, 0x49656E69};
+static const uint32_t AmdId[3] = {0x68747541, 0x444D4163, 0x69746E65};
+
+//
+bool have_cpuid(void) {
+#if defined(__386__) && !defined(__AMD64__)
+    /*
+        if can't flip ac bit (0x040000)
+            386 or below, cpuid is not accessible
+        else if can't flip cpuid (0x200000)
+            older 486, cpuid is accessible but not executable
+        else
+            newer 486 or above, cpuid is executable
+    */
+    uint32_t a, b:
+    int32_t j, i;
+
+    for (i = 0; i < 2; i++) {
+        j = eflg_chks[i];
+
+        __asm__ __volatile__ (
+            "pushfl\n\t"
+            "popl %%eax\n\t"
+            "movl %%eax, %0\n\t"
+            "xorl %3, %%eax\n\t"
+            "pushl %%eax\n\t"
+            "popfl\n\t"
+            "pushfl\n\t"
+            "popl %%eax\n\t"
+            "movl %%eax, %1\n\t"
+            "pushl %0\n\t"
+            "popfl\n"
+            : "r="(a), "r="(b)
+            : "r"(j)
+            : "eax"
+        );
+
+        if ((a & j) != (b & j)
+            return false;
+    }
+#endif
+    return true;
+}
+
+//
+void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
+//    regs_t r;
+
+    __asm__ __volatile__ (
+        "mov %4, %%eax\n\t"
+        "mov %5, %%ecx\n\t"
+        "cpuid\n\t"
+        "mov %%eax, %0\n\t"
+        "mov %%ebx, %1\n\t"
+        "mov %%ecx, %2\n\t"
+        "mov %%edx, %3\n"
+        : "=m"(r->eax), "=m"(r->ebx), "=m"(r->ecx), "=m"(r->edx)
+        : "r"(f1), "r"(f2)
+        : "eax", "ebx", "ecx", "edx"
+    );
+}
+
+//  Number of online processors
+int onln(void) {
+#if defined(__WINDOWS__)
+	return conf();
+#else
+	return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
+
+//  Number of configured processors
+int conf(void) {
+#if defined(__WINDOWS__)
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo(&sysinfo);
+	return sysinfo.dwNumberOfProcessors;
+#else
+	return sysconf(_SC_NPROCESSORS_CONF);
+#endif
+}
+
+#ifdef DO_MAIN
+#include <stdio.h>
+
+int main(int argc, char* argv[]) {
+
+    int f = have_cpuid();
+
+    if (!f) {
+        printf("no executable cpuid\n");
+        return 0;
+    }
+
+    regs_t r;
+    //----------
+    // max cpuid and vendor name
+    //----------
+    cpuid(&r, 0, 0);
+
+    uint32_t max_cpuid = r.eax;
+	printf("max_cpuid: %d\n", max_cpuid);
+
+    char vendor[12];
+//  why doesn't this work?
+//	sprintf(vendor, "%.4s%.4s%.4s", (char*) &r.ebx, (char*) &r.edx,  (char*) &r.ecx);
+
+    // actual string
+	sprintf(&vendor[0], "%.4s", (char*) &r.ebx);
+	sprintf(&vendor[4], "%.4s", (char*) &r.edx);
+	sprintf(&vendor[8], "%.4s", (char*) &r.ecx);
+	printf("%.12s\n", vendor);
+
+    // show AMD string
+//	sprintf(&vendor[0], "%.4s", (char*) &AmdId[0]);
+//	sprintf(&vendor[4], "%.4s", (char*) &AmdId[2]);
+//	sprintf(&vendor[8], "%.4s", (char*) &AmdId[1]);
+//	printf("%.12s\n", vendor);
+
+    int ven = 0;
+    if (r.ebx == IntelId[0] && r.ecx == IntelId[1] && r.edx == IntelId[2]) {
+        ven = VEN_INTEL;
+    } else if (r.ebx == AmdId[0] && r.ecx == AmdId[1] && r.edx == AmdId[2]) {
+        ven = VEN_AMD;
+    }
+
+    //----------
+    // check for restricted cpuid execution
+    //----------
+    int cpuid_restricted = false;
+    cpuid(&r, 0x80000000, 0);
+//    uint32_t max_cpuid_ext = r.eax;
+
+	if ( max_cpuid <= 4 && r.eax > 0x80000004) {
+        cpuid_restricted = true;
+        printf("cpuid execution restricted...\n");
+    }
+
+    //----------
+    // HTT enabled/present
+    //----------
+    int htt_enabled = 0;
+    cpuid(&r, 1, 0);
+    if (r.edx & HTT_BIT) {
+        htt_enabled = true;
+        printf("HTT available\n");
+    } else {
+// but we can check for multiple hardware packages
+        printf("HTT not available\n");
+        return;
+    }
+
+//    uint32_t logical_proc_cnt = ((r.ebx >> 16) & 0xFF);
+//       printf("logical_proc_cnt: %d\n", logical_proc_cnt);
+
+/*
+    cpuid(&r, 1, 0)
+    if !htt_enabled
+        single core
+
+    int has_b_leaf
+    if max_cpuid >= 0x0B
+        cpuid(&r, 0x0B, 0)
+        has_b_leaf = (r.ebx != 0)
+
+    if has_b_leaf
+
+    if !has_b_leaf
+*/
+
+//    switch (ven) {
+//        case VEN_INTEL:
+//            printf("vendor: Intel\n");
+//            r = cpuid(4);
+//            cores += ((r.ebx >> 26) & 0x3F);
+//            break;
+//        case VEN_AMD:
+//            printf("vendor: AMD\n");
+//            r = cpuid(0x80000008);
+//            cores += (r.ecx & 0xFF);
+//            break;
+//        default:
+//            break;
+//    }
+
+//	printf("cores: %d\n", cores);
+}
+#endif

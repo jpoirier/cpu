@@ -1,0 +1,30 @@
+Description
+------------
+
+
+Compiling
+---------
+    make install - builds and installs the package
+
+
+Testing
+-------
+    make main - builds and installs the package and creates the example file main
+
+Usage
+-----
+
+
+Examples
+--------
+
+
+Misc
+----
+
+
+TODO
+----
+- add error enumerations
+- handle no windows systems that don't have _SC_NPROCESSORS_ONLN and _SC_NPROCESSORS_CONF
+- if 64-bit or new 32-bit and leaf vale < 4 check IA32_MISC_ENABLES bit 22
