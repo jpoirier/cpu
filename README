@@ -18,10 +18,10 @@ Description
 
     For multi-package system the package count calculation
     probably isn't correct at the moment. It assumes that the
-    physical package count can be derived by dividing the the
-    maximum processor count by the logical processor count of
-    the package that the thread is running on, and that the
-    configuration is symmetrical.
+    physical package count can be derived by dividing the maximum
+    processor count by the logical processor count of the package
+    that the thread is running on, and that the configuration is
+    symmetrical.
 
     The ideal way to calculate the package/core/thread count
     for multi-package systems is to iterate through the system
