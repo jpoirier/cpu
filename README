@@ -64,7 +64,7 @@ Misc
 - A logical processor refers to a hardware resource that can execute a single thread
 - Hyperthreading refers to the technology that allows a processor core to provide the
   functionality of more than one logical core
-- Simultaneous Multi-Threading refers
+- Simultaneous Multi-Threading refers to multiple logical processors within the same core
 - Multi-Core Processor contains more than one physical core
 - MultiProcessor Platform contains multiple physical sockets
 - Hardware Multithreading refers to any combination of hardware support to allow
