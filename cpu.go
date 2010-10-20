@@ -60,7 +60,6 @@ func utos(a uint32) string {
 	b[1] = byte(a >> 8)
 	b[2] = byte(a >> 16)
 	b[3] = byte(a >> 24)
-
 	return fmt.Sprintf("%s", b)
 }
 
