@@ -89,6 +89,7 @@ bool have_cpuid(void) {
 
 //
 void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
+    __asm__ __volatile__ (
 #if defined(__386__) && !defined(__AMD64__)
         "pushl %%ebx\n\t"
 #endif
@@ -98,9 +99,9 @@ void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
         "movl %%eax, %0\n\t"
         "movl %%ebx, %1\n\t"
         "movl %%ecx, %2\n\t"
-        "movl %%edx, %3\n\t"
+        "movl %%edx, %3\n"
 #if defined(__386__) && !defined(__AMD64__)
-        "popl %%ebx\n"
+        "popl %%ebx\n\t"
 #endif
         : "=m"(r->eax), "=m"(r->ebx), "=m"(r->ecx), "=m"(r->edx)
         : "r"(f1), "r"(f2)
