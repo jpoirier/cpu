@@ -5,7 +5,7 @@
 package main
 
 import (
-	"bitbucket.org/jpoirier/cpu"
+	"cpu"
 	"fmt"
 )
 
