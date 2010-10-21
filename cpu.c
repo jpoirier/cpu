@@ -6,6 +6,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #elif defined(__LINUX__) || defined(__DARWIN__) || defined(__FREEBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
 #include <unistd.h>
 #else
 #error "Invalid GOOS: must be darwin, freebsd, linux, or windows"
@@ -118,7 +120,13 @@ uint32_t onln(void) {
 #if defined(__WINDOWS__)
 	return (uint32_t) conf();
 #else
-	return (uint32_t) sysconf(_SC_NPROCESSORS_ONLN);
+    int x; uint32_t cnt; size_t sz = sizeof(cnt);
+    int mib[2] = {CTL_HW, HW_AVAILCPU};
+    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) != -1) { return (uint32_t)x; }
+    if ((x = sysctl(mib, 2, &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
+    if ((x = sysctlbyname("hw.activecpu", &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
+    if ((x = sysctlnametomib("hw.activecpu", mib, &sz)) != -1 ) { return (uint32_t)x; }
+	return 0;
 #endif
 }
 
@@ -129,6 +137,8 @@ uint32_t conf(void) {
 	GetSystemInfo(&sysinfo);
 	return (uint32_t) sysinfo.dwNumberOfProcessors;
 #else
-	return (uint32_t) sysconf(_SC_NPROCESSORS_CONF);
+    int x;
+    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) == -1) { x = onln(); }
+	return (uint32_t) x;
 #endif
 }
