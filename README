@@ -16,7 +16,7 @@ Description
         - report HTT per core count
         - report HTT per package count
 
-    For multi-package system the package count calculation
+    For multi-package systems the package count calculation
     probably isn't correct at the moment. It assumes that the
     physical package count can be derived by dividing the maximum
     processor count by the logical processor count of the package

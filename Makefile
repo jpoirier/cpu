@@ -1,5 +1,5 @@
 include $(GOROOT)/src/Make.inc
-TARG=cpu
+TARG=bitbucket.org/jpoirier/cpu
 
 CGOFILES=\
 	cpu.go
@@ -8,9 +8,6 @@ LDPATH_freebsd=-Wl,-R,`pwd`
 LDPATH_linux=-Wl,-R,`pwd`
 LDPATH_darwin=
 LDPATH_windows=
-
-#VERS=uname -r
-#OSXVER=$shell(sw_vers | awk '/ProductVersion/ {print $2}')
 
 ifeq ($(GOOS),darwin)
 CFLAGS+=-D__DARWIN__

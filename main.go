@@ -5,7 +5,7 @@
 package main
 
 import (
-	"cpu"
+	"bitbucket.org/jpoirier/cpu"
 	"fmt"
 )
 
@@ -17,9 +17,9 @@ func main() {
 	fmt.Println("htt supported     : ", cpu.HttSupported)
 	fmt.Println("OS processors     : ", cpu.OSProcCnt) // also via cpu.Onln()
 	fmt.Println("maximum processors: ", cpu.MaxProc)   // also via cpu.Conf()
-	fmt.Println("package count     : ", cpu.PkgCntEnum)
-	fmt.Println("core count        : ", cpu.CoreCntEnum)
-	fmt.Println("thread count      : ", cpu.ThreadCntEnum)
+	fmt.Println("package count     : ", cpu.PkgCnt)
+	fmt.Println("core count        : ", cpu.CoreCnt)
+	fmt.Println("thread count      : ", cpu.ThreadCnt)
 	fmt.Println("htt/smt per core  : ", cpu.HttSmtPerCore)
 	fmt.Println("htt/smt per pkg   : ", cpu.HttSmtPerPkg)
 	fmt.Println("OS processors     : ", cpu.Onln())

@@ -12,17 +12,30 @@ import (
 	"unsafe"
 )
 
+// CpuidPresent is the cpuid instruction present flag.
 var CpuidPresent    bool
+// CpuidRestricted is the cpuid instruction restricted flag.
 var CpuidRestricted bool
+// HttSupported is the Hyper-Threading Technology supported flag.
 var HttSupported    bool
+// Vendor is the package vendor's name.
 var Vendor          string
+// MaxProc is the maximum number of logical processors supported by the OS.
 var MaxProc         uint32
+// OSProcCnt is the number of logical processors that are on line.
 var OSProcCnt       uint32
-var PkgCntEnum      uint32
-var CoreCntEnum     uint32
-var ThreadCntEnum   uint32
+// PkgCnt is the number of physical packages in the system.
+var PkgCnt          uint32
+// CoreCnt is the number of physical cores in the system.
+var CoreCnt         uint32
+// ThreadCnt is the number of threads running in the system.
+var ThreadCnt       uint32
+// HttSmtPerCore is the logical core count associated to a physical core,
+// excluding the physical core (always 1?)
 var HttSmtPerCore   uint32
+// HttSmtPerPkg is the logical core count minus the physical core count in a package.
 var HttSmtPerPkg    uint32
+// Error
 var Error           bool
 
 type regs struct {
@@ -47,7 +60,7 @@ func have_cpuid() bool {
 	return bool(C.have_cpuid())
 }
 
-// cpuid executes the function f1 and sub function f2 with the output
+// cpuid executes the function f1 and sub function f2, the output
 // registers from the operation returned in r.
 func cpuid(r *regs, f1, f2 uint32) {
 	C.cpuid((*C.regs_t)(unsafe.Pointer(r)), C.uint32_t(f1), C.uint32_t(f2))
@@ -65,9 +78,9 @@ func utos(a uint32) string {
 
 // CpuParams
 func CpuParams() bool {
-	PkgCntEnum    = 1
-	CoreCntEnum   = 1
-	ThreadCntEnum = 1
+	PkgCnt        = 1
+	CoreCnt       = 1
+	ThreadCnt     = 1
 	HttSmtPerCore = 0
 	HttSmtPerPkg  = 0
 	MaxProc       = Conf()
@@ -109,9 +122,9 @@ func CpuParams() bool {
 		Error = true
 		return false
 	}
-	PkgCntEnum    = MaxProc / logCoreCnt // wrong? symmetrical for multiple packages?
-	CoreCntEnum   = phyCoreCnt
-	ThreadCntEnum = logCoreCnt
+	PkgCnt        = MaxProc / logCoreCnt // wrong? symmetrical for multiple packages?
+	CoreCnt       = phyCoreCnt
+	ThreadCnt     = logCoreCnt
 	HttSmtPerPkg  = logCoreCnt - phyCoreCnt
 	if logCoreCnt > phyCoreCnt && HttSupported { HttSmtPerCore = 1 /* always 1? */ }
 	return true
