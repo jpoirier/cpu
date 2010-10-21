@@ -1,20 +1,33 @@
 Description
 ------------
+
     cpu package reports processor topology
 
     currently reports (see main.go):
-        - if the cpuid instruction is present
-        - if cpuid execution is restricted
-        - if Hyper-Threading Technology is supported
+        - if an error was encountered which would invalidate info
+        - if the cpuid instruction is present/executable, older 486 or below - always 1 core per package
+        - if cpuid execution is restricted, unable to execute cpuid functions
+        - if Hyper-Threading Technology is supported, but doesn't necessarily mean it's enabled
         - maximum number of processors supported by the OS
         - number of processors on line
         - Vendor name
-        - report OS process count
         - report total package count
         - report total core count
         - report total thread count
         - report HTT per core count
         - report HTT per package count
+
+    TODO
+    ----
+    I'm currently working on code to enumerate through packages/cores/threads.
+    I do development commits to the bitbucket repo but I'll be sure to make
+    incremental tags for working code.
+
+    At some point the package name will probably change to something broader
+    like sys with the information items containing more detail, e.g. sys.CpuCnt.
+
+    At this point the code has only been tested on 64-bit OS X.
+
 
     For multi-package systems the package count calculation
     probably isn't correct at the moment. It assumes that the
@@ -39,6 +52,9 @@ Description
         machdep.cpu.cores_per_package
         machdep.cpu.core_count
         machdep.cpu.thread_count
+
+    You ccould do this from a bash script or make or call to sysctl
+    from within some Go code
 
 Compiling
 ---------
