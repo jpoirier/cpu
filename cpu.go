@@ -35,7 +35,8 @@ var ThreadCnt       uint32
 var HttSmtPerCore   uint32
 // HttSmtPerPkg is the logical core count minus the physical core count in a package.
 var HttSmtPerPkg    uint32
-// Error
+// Error reports if an error occurred during the information gathering process.
+// TODO: Needs to be fine grained so the caller knows where the error occurred
 var Error           bool
 
 type regs struct {
@@ -72,25 +73,6 @@ func utos(a uint32) string {
 	b[0] = byte(a >>  0); b[1] = byte(a >>  8);
 	b[2] = byte(a >> 16); b[3] = byte(a >> 24)
 	return fmt.Sprintf("%s", b)
-}
-
-// rev_u32 returns the bits of a in reverse order
-func rev_u32(a uint32) uint32 {
-	a = (((a&0XAAAAAAAA)>>1)|((a&0X55555555)<< 1))
-	a = (((a&0XCCCCCCCC)>>2)|((a&0X33333333)<< 2))
-	a = (((a&0XF0F0F0F0)>>4)|((a&0X0F0F0F0F)<< 4))
-	a = (((a&0XFF00FF00)>>8)|((a&0X00FF00FF)<< 8))
-	return ((a>>16)|(a<<16))
-}
-
-var l_table = [32]uint32 {
-	0,9,1,10,13,21,2,29,11,14,16,18,22,25,3,30,
-	8,12,20,28,15,17,24,7,19,27,23,6,26,5,4,31}
-
-// high_bit returns the position of the highest order set bit in a
-func high_bit(a uint32) uint32 {
-	a |= a>>1; a |= a>>2; a |= a>>4; a |= a>>8; a |= a>>16
-	return l_table[(a*0x07C4ACDD)>>27]
 }
 
 // CpuParams
@@ -139,6 +121,7 @@ func CpuParams() bool {
 		Error = true
 		return false
 	}
+
 	PkgCnt        = MaxProc / logCoreCnt // wrong? symmetrical for multiple packages?
 	CoreCnt       = phyCoreCnt
 	ThreadCnt     = logCoreCnt
