@@ -109,12 +109,11 @@ func CpuParams() bool {
 	CpuidPresent = have_cpuid()
 	if !CpuidPresent { return false }
 	// vendor name
-	var info regs
-	cpuid(&info, 0, 0)
-	maxCpuid := info.eax
-	Vendor = utos(info.ebx) + utos(info.edx) + utos(info.ecx)
-	// restricted cpuid execution
 	var r regs
+	cpuid(&r, 0, 0)
+	maxCpuid := r.eax
+	Vendor = utos(r.ebx) + utos(r.edx) + utos(r.ecx)
+	// restricted cpuid execution
 	CpuidRestricted = false
 	cpuid(&r, 0x80000000, 0)
 	if maxCpuid<=4 && r.eax>0x80000004 {
@@ -145,7 +144,7 @@ func CpuParams() bool {
 		Htt = true
 		HttProcCnt = PhyCoreCnt * (apicid & smtid_mask)
 	}
-	return true
+	return false
 }
 
 func init() {
