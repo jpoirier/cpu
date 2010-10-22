@@ -7,6 +7,7 @@ package main
 import (
 	"cpu"
 	"fmt"
+	"runtime"
 )
 
 func main() {
@@ -27,4 +28,6 @@ func main() {
 	fmt.Println("")
 	fmt.Println("on line logical processors : ", cpu.Onln())
 	fmt.Println("maximum logical processors : ", cpu.Conf())
+	// set Go's runtime processor count
+	runtime.GOMAXPROCS(int(cpu.MaxProcCnt))
 }
