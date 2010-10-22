@@ -116,7 +116,7 @@ void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
 }
 
 //  Number of online processors
-uint32_t onln(void) {
+uint32_t onlineProcs(void) {
 #if defined(__WINDOWS__)
 	return (uint32_t) conf();
 #else
@@ -131,14 +131,14 @@ uint32_t onln(void) {
 }
 
 //  Number of OS configured processors
-uint32_t conf(void) {
+uint32_t confProcs(void) {
 #if defined(__WINDOWS__)
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	return (uint32_t) sysinfo.dwNumberOfProcessors;
 #else
     int x;
-    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) == -1) { x = onln(); }
+    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) == -1) { x = onlineProcs(); }
 	return (uint32_t) x;
 #endif
 }

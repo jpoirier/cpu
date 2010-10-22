@@ -13,43 +13,45 @@ import (
 )
 
 // CpuidPresent indicates whether the cpuid instruction is present.
-var CpuidPresent    bool
+var CpuidPresent bool
 
 // CpuidRestricted indicates whether the cpuid instruction is restricted,
 // i.e. not executable.
 var CpuidRestricted bool
 
-// Hwt indicates whether hardware multi-threading is supported,
+// HardwareThreading indicates whether hardware multi-threading is supported,
 // can be hyper-threading and/or multiple physical cores.
-var Hwt             bool
+var HardwareThreading bool
 
-// Htt indicates whether hyper-threading is enabled.
-var Htt             bool
+// HyperThreading indicates whether hyper-threading is enabled.
+var HyperThreading bool
 
 // Vendor is the package vendor's name.
-var Vendor          string
+var Vendor string
 
-// MaxProcCnt is the maximum number of logical processors supported by the OS.
+// MaxProcs is the maximum number of logical processors supported by the OS.
 // This may include logical processors from packages outside of the one being
 // reported on.
-var MaxProcCnt      uint32
+var MaxProcs uint32
 
-// OnlnProcCnt is the number of logical processors that are on line.
-var OnlnProcCnt     uint32
+// OnlnProcs is the number of logical processors that are on line.
+var OnlnProcs uint32
 
-// PhyCoreCnt is the number of physical cores in the package.
-var PhyCoreCnt      uint32
+// PhysicalCores is the number of physical cores in the package.
+var PhysicalCores uint32
 
-// LogProcCnt is the maximum addressable logical processors in the package,
+// LogicalProcs is the maximum addressable logical processors in the package,
 // but not necessarily occupied by a logical processors
-var LogProcCnt      uint32
+var LogicalProcs uint32
 
-// HttProcCnt is the number of hyper-threading logical processors in the package.
-var HttProcCnt      uint32
+// HyperThreadingProcs is the number of hyper-threading logical processors in the package.
+var HyperThreadingProcs uint32
 
 // Error reports if an error occurred during the information gathering process.
 // TODO: Needs to be fine grained so the caller knows where the error occurred
-var Error           bool
+var Error bool
+
+var Pkgs uint32
 
 // PkgCnt is the number of physical packages in the system.
 //var PkgCnt          uint32
@@ -61,14 +63,14 @@ type regs struct {
 	edx uint32
 }
 
-// Onln returns the number of logical processors that are on line.
-func Onln() uint32 {
-	return uint32(C.onln())
+// OnlinenProcs returns the number of logical processors that are on line.
+func OnlineProcs() uint32 {
+	return uint32(C.onlineProcs())
 }
 
-// Conf returns the maximum number of logical processors supported by the OS.
-func Conf() uint32 {
-	return uint32(C.conf())
+// ConfProcs returns the maximum number of logical processors supported by the OS.
+func ConfProcs() uint32 {
+	return uint32(C.confProcs())
 }
 
 // have_cpuid returns whether or not the cpuid instruction exists
@@ -97,14 +99,14 @@ func mask_width(x uint32) uint32 {
 
 // CpuParams
 func CpuParams() bool {
-//	PkgCnt        = 1
-	Hwt           = false
-	Htt           = false
-	PhyCoreCnt    = 1
-	LogProcCnt    = 1
-	HttProcCnt    = 0
-	MaxProcCnt    = Conf()
-	OnlnProcCnt   = Onln()
+	Pkgs = 1
+	HardwareThreading = false
+	HyperThreading = false
+	PhysicalCores = 1
+	LogicalProcs = 1
+	HyperThreadingProcs = 0
+	MaxProcs = ConfProcs()
+	OnlnProcs = OnlineProcs()
 	// cpuid check
 	CpuidPresent = have_cpuid()
 	if !CpuidPresent { return false }
@@ -120,29 +122,29 @@ func CpuParams() bool {
 		CpuidRestricted = true
 		return false
 	}
-	// hwt enabled
+	// HardwareThreading enabled
 	cpuid(&r, 1, 0)
 	if r.edx>>28&1 != 0 {
-		Hwt = true
+		HardwareThreading = true
 	}
-	if !Hwt { return false } // single core and no htt
-	LogProcCnt = r.ebx >> 16 & 0xFF
+	if !HardwareThreading { return false } // single core and no HyperThreading
+	LogicalProcs = r.ebx >> 16 & 0xFF
 	apicid := r.ebx >> 24 & 0xFF
 	if Vendor == "GenuineIntel" {
 		cpuid(&r, 4, 0)
-		PhyCoreCnt = (r.eax >> 26 & 0x3F) + 1
+		PhysicalCores = (r.eax >> 26 & 0x3F) + 1
 	} else if Vendor == "AuthenticAMD" {
 		cpuid(&r, 0x80000008, 0)
-		PhyCoreCnt = (r.ecx & 0xFF) + 1
+		PhysicalCores = (r.ecx & 0xFF) + 1
 	} else {
 		Error = true
 		return false
 	}
-	// htt enabled and htt logical processors
-	smtid_mask := mask_width(LogProcCnt-PhyCoreCnt)
+	// HyperThreading enabled and HardwareThreading logical processors
+	smtid_mask := mask_width(LogicalProcs-PhysicalCores)
 	if smtid_mask > 0 {
-		Htt = true
-		HttProcCnt = PhyCoreCnt * (apicid & smtid_mask)
+		HyperThreading = true
+		HyperThreadingProcs = PhysicalCores * (apicid & smtid_mask)
 	}
 	return false
 }

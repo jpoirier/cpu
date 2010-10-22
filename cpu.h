@@ -17,7 +17,7 @@ typedef struct {
 
 extern bool have_cpuid(void);
 extern void cpuid(regs_t* r, uint32_t f1, uint32_t f2);
-extern uint32_t conf(void);
-extern uint32_t onln(void);
+extern uint32_t confProcs(void);
+extern uint32_t onlineProcs(void);
 
 #endif // CPU_H
