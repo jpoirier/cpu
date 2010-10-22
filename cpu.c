@@ -51,6 +51,20 @@
 uint32_t eflg_chks[2] = {CHK_386, CHK_486};
 #endif
 
+#if defined(__DARWIN__)
+#define MIB_0   CTL_HW
+#define MIB_1   HW_AVAILCPU
+#elif defined(__LINUX__) || defined(__FREEBSD__)
+# if defined(CTL_HW) && defined(HW_NCPU)
+# define MIB_0   CTL_HW
+# define MIB_1   HW_NCPU
+# else
+# define MIB_0
+# define MIB_1
+# endif
+#endif
+
+
 //
 bool have_cpuid(void) {
 #if defined(__386__) && !defined(__AMD64__)
@@ -121,11 +135,14 @@ uint32_t onlineProcs(void) {
 	return (uint32_t) conf();
 #else
     int x; uint32_t cnt; size_t sz = sizeof(cnt);
-    int mib[2] = {CTL_HW, HW_AVAILCPU};
     if ((x = sysconf(_SC_NPROCESSORS_ONLN)) != -1) { return (uint32_t)x; }
+#if defined(MIB_0) && defined(MIB_1)
+    int mib[2] = {MIB_0, MIB_1};
     if ((x = sysctl(mib, 2, &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
-    if ((x = sysctlbyname("hw.activecpu", &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
-    if ((x = sysctlnametomib("hw.activecpu", mib, &sz)) != -1 ) { return (uint32_t)x; }
+#endif
+// hw.activecpu hw.ncpu
+    if ((x = sysctlbyname("hw.ncpu", &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
+    if ((x = sysctlnametomib("hw.ncpu", mib, &sz)) != -1 ) { return (uint32_t)x; }
 	return 0;
 #endif
 }
