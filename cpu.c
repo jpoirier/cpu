@@ -58,9 +58,6 @@ uint32_t eflg_chks[2] = {CHK_386, CHK_486};
 # if defined(CTL_HW) && defined(HW_NCPU)
 # define MIB_0   CTL_HW
 # define MIB_1   HW_NCPU
-# else
-# define MIB_0
-# define MIB_1
 # endif
 #endif
 
