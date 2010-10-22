@@ -12,32 +12,42 @@ import (
 	"unsafe"
 )
 
-// CpuidPresent is the cpuid instruction present flag.
+// CpuidPresent indicates whether the cpuid instruction is present.
 var CpuidPresent    bool
-// CpuidRestricted is the cpuid instruction restricted flag.
+
+// CpuidRestricted indicates whether the cpuid instruction is restricted,
+// i.e. not executable.
 var CpuidRestricted bool
-// HttSupported is the Hyper-Threading Technology supported flag.
-var HttSupported    bool
+
+// Hwt indicates whether hardware multi-threading is supported,
+// can be hyper-threading and/or multiple physical cores.
+var Hwt             bool
+
 // Vendor is the package vendor's name.
 var Vendor          string
-// MaxProc is the maximum number of logical processors supported by the OS.
-var MaxProc         uint32
-// OSProcCnt is the number of logical processors that are on line.
-var OSProcCnt       uint32
-// PkgCnt is the number of physical packages in the system.
-var PkgCnt          uint32
-// CoreCnt is the number of physical cores in the system.
-var CoreCnt         uint32
-// ThreadCnt is the number of threads running in the system.
-var ThreadCnt       uint32
-// HttSmtPerCore is the logical core count associated to a physical core,
-// excluding the physical core (always 1?)
-var HttSmtPerCore   uint32
-// HttSmtPerPkg is the logical core count minus the physical core count in a package.
-var HttSmtPerPkg    uint32
+
+// MaxProcCnt is the maximum number of logical processors supported by the OS.
+var MaxProcCnt      uint32
+
+// OnlnProcCnt is the number of logical processors that are on line.
+var OnlnProcCnt     uint32
+
+// PhyCoreCnt is the number of physical cores in the package.
+var PhyCoreCnt      uint32
+
+// LogProcCnt is the maximum addressable logical processors in the package,
+// but not necessarily occupied by a logical processors
+var LogProcCnt      uint32
+
+// HttProcCnt is the number of hyper-threading logical processors in the package.
+var HttProcCnt      uint32
+
 // Error reports if an error occurred during the information gathering process.
 // TODO: Needs to be fine grained so the caller knows where the error occurred
 var Error           bool
+
+// PkgCnt is the number of physical packages in the system.
+//var PkgCnt          uint32
 
 type regs struct {
 	eax uint32
@@ -77,18 +87,15 @@ func utos(a uint32) string {
 
 // CpuParams
 func CpuParams() bool {
-	PkgCnt        = 1
-	CoreCnt       = 1
-	ThreadCnt     = 1
-	HttSmtPerCore = 0
-	HttSmtPerPkg  = 0
-	MaxProc       = Conf()
-	OSProcCnt     = Onln()
+//	PkgCnt        = 1
+	Hwt           = false
+	PhyCoreCnt    = 1
+	LogProcCnt    = 1
+	MaxProcCnt    = Conf()
+	OnlnProcCnt   = Onln()
 	// cpuid check
 	CpuidPresent = have_cpuid()
-	if !CpuidPresent {
-		return false
-	}
+	if !CpuidPresent { return false }
 	// vendor name
 	var info regs
 	cpuid(&info, 0, 0)
@@ -103,30 +110,23 @@ func CpuParams() bool {
 		return false
 	}
 	// htt enabled
-	HttSupported = false
 	cpuid(&r, 1, 0)
 	if r.edx>>28&1 != 0 {
-		HttSupported = true
+		Hwt = true
 	}
-	// physical and logical core cnt for this package
-	var logCoreCnt uint32 = r.ebx >> 16 & 0xFF
-	var phyCoreCnt uint32
+	if !Hwt { return false } // single core and no htt
+	LogProcCnt = r.ebx >> 16 & 0xFF
 	if Vendor == "GenuineIntel" {
 		cpuid(&r, 4, 0)
-		phyCoreCnt = (r.eax >> 26 & 0x3F) + 1
+		PhyCoreCnt = (r.eax >> 26 & 0x3F) + 1
 	} else if Vendor == "AuthenticAMD" {
 		cpuid(&r, 0x80000008, 0)
-		phyCoreCnt = (r.ecx & 0xFF) + 1
+		PhyCoreCnt = (r.ecx & 0xFF) + 1
 	} else {
 		Error = true
 		return false
 	}
-
-	PkgCnt        = MaxProc / logCoreCnt // wrong? symmetrical for multiple packages?
-	CoreCnt       = phyCoreCnt
-	ThreadCnt     = logCoreCnt
-	HttSmtPerPkg  = logCoreCnt - phyCoreCnt
-	if logCoreCnt > phyCoreCnt && HttSupported { HttSmtPerCore = 1 /* always 1? */ }
+	if MaxProcCnt > PhyCoreCnt { HttProcCnt = MaxProcCnt - PhyCoreCnt }
 	return true
 }
 
