@@ -23,10 +23,15 @@ var CpuidRestricted bool
 // can be hyper-threading and/or multiple physical cores.
 var Hwt             bool
 
+// Htt indicates whether hyper-threading is enabled.
+var Htt             bool
+
 // Vendor is the package vendor's name.
 var Vendor          string
 
 // MaxProcCnt is the maximum number of logical processors supported by the OS.
+// This may include logical processors from packages outside of the one being
+// reported on.
 var MaxProcCnt      uint32
 
 // OnlnProcCnt is the number of logical processors that are on line.
@@ -85,12 +90,19 @@ func utos(a uint32) string {
 	return fmt.Sprintf("%s", b)
 }
 
+func mask_width(x uint32) uint32 {
+	if x == 0 { return 0 }
+	return ^(0xFFFFFFFF<<x)
+}
+
 // CpuParams
 func CpuParams() bool {
 //	PkgCnt        = 1
 	Hwt           = false
+	Htt           = false
 	PhyCoreCnt    = 1
 	LogProcCnt    = 1
+	HttProcCnt    = 0
 	MaxProcCnt    = Conf()
 	OnlnProcCnt   = Onln()
 	// cpuid check
@@ -109,13 +121,14 @@ func CpuParams() bool {
 		CpuidRestricted = true
 		return false
 	}
-	// htt enabled
+	// hwt enabled
 	cpuid(&r, 1, 0)
 	if r.edx>>28&1 != 0 {
 		Hwt = true
 	}
 	if !Hwt { return false } // single core and no htt
 	LogProcCnt = r.ebx >> 16 & 0xFF
+	apicid := r.ebx >> 24 & 0xFF
 	if Vendor == "GenuineIntel" {
 		cpuid(&r, 4, 0)
 		PhyCoreCnt = (r.eax >> 26 & 0x3F) + 1
@@ -126,7 +139,12 @@ func CpuParams() bool {
 		Error = true
 		return false
 	}
-	if MaxProcCnt > PhyCoreCnt { HttProcCnt = MaxProcCnt - PhyCoreCnt }
+	// htt enabled and htt logical processors
+	smtid_mask := mask_width(LogProcCnt-PhyCoreCnt)
+	if smtid_mask > 0 {
+		Htt = true
+		HttProcCnt = PhyCoreCnt * (apicid & smtid_mask)
+	}
 	return true
 }
 
