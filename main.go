@@ -11,23 +11,38 @@ import (
 )
 
 func main() {
-	fmt.Println("\nAn OS views physical cores and hardware threads as logical processors \nin a multi-package, multi-core, multi-threading environment.")
-	fmt.Println("error                      : ", cpu.Error)
-	fmt.Println("cpuid present              : ", cpu.CpuidPresent)
-	fmt.Println("cpuid restricted           : ", cpu.CpuidRestricted)
-	fmt.Println("HardwareThreading supported: ", cpu.HardwareThreading) // hardware multi-threading
-	fmt.Println("HyperThreading enabled     : ", cpu.HyperThreading)    // hyper-threading
-	fmt.Println("on line logical processors : ", cpu.OnlnProcs)         // also via cpu.OnlineProcs()
-	fmt.Println("maximum logical processors : ", cpu.MaxProcs)          // also via cpu.ConfProcs()
-	fmt.Println("physical processors        : ", cpu.Pkgs)
-	fmt.Println("physical cores             : ", cpu.PhysicalCores)
-	fmt.Println("logical processors         : ", cpu.LogicalProcs)
-	fmt.Println("HyperThreading processors  : ", cpu.HyperThreadingProcs)
-	fmt.Println("vendor                     : ", cpu.Vendor)
+	fmt.Println("\nAn OS views physical cores and hyper-threads as logical processors \nin a multi-package, multi-core, multi-threading environment.")
+	fmt.Println("Note that the term package refers to a physical processor\nand system refers to multiple packages\n")
+
+	fmt.Println("physical processors (aka packages)                        : ", cpu.Processors)
+	fmt.Println("on line logical processors in the system                  : ", cpu.OnlnProcs) // also via cpu.OnlineProcs()
+	fmt.Println("maximum logical processors in the system                  : ", cpu.MaxProcs) // also via cpu.ConfProcs()
+
+	fmt.Println("cpuid present                                             : ", cpu.CpuidPresent)
+	fmt.Println("cpuid restricted                                          : ", cpu.CpuidRestricted)
+	fmt.Println("hardware-threading supported                              : ", cpu.HardwareThreading)
+	fmt.Println("hyper-threading capable                                   : ", cpu.HyperThreadingCapable)
+	fmt.Println("vendor name                                               : ", cpu.Vendor)
+
+	fmt.Println("\n    --- processor hardware capability  ---")
+	fmt.Println("logical processors per physical processor                 : ", cpu.LogicalProcsPkg)
+	fmt.Println("physical cores per physical processor                     : ", cpu.PhysicalCoresPkg)
+	fmt.Println("hyper-threading enabled                                   : ", cpu.HyperThreadingEnabled)
+	fmt.Println("hyper-threading logical processors per physical processor : ", cpu.HyperThreadingProcsPkg)
+
+	fmt.Println("\n    --- processor hardware configuration ---")
+	fmt.Println("logical processors configured                            : ", cpu.LogicalProcsConf)
+	fmt.Println("physical cores configured                                : ", cpu.PhysicalCoresConf)
+	fmt.Println("hyper-threading processors configured                    : ", cpu.HyperThreadingProcsConf)
+
+	fmt.Println("")
+	fmt.Println("errors during system interrogation                       : ", cpu.Error)
+
 	// show the exported fnctions for completeness
 	fmt.Println("")
-	fmt.Println("on line logical processors : ", cpu.OnlineProcs())
-	fmt.Println("maximum logical processors : ", cpu.ConfProcs())
+	fmt.Println("on line logical processors in the system                  : ", cpu.OnlineProcs())
+	fmt.Println("maximum logical processors in the system                  : ", cpu.ConfProcs())
+
 	// set Go's runtime processor count
 	runtime.GOMAXPROCS(int(cpu.MaxProcs))
 }

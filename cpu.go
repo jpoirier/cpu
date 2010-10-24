@@ -13,8 +13,8 @@ import (
 )
 
 
-// Pkgs is the number of physical processors that plug in to a socket.
-var Pkgs uint32
+// Processors is the number of physical processors (that plug in to a socket).
+var Processors uint32
 
 // CpuidPresent indicates whether the cpuid instruction is present.
 var CpuidPresent bool
@@ -27,8 +27,11 @@ var CpuidRestricted bool
 // can be hyper-threading and/or multiple physical cores within a package.
 var HardwareThreading bool
 
-// HyperThreading indicates whether hyper-threading is enabled.
-var HyperThreading bool
+// HyperThreadingCapable indicates whether the package is hyper-threading capable.
+var HyperThreadingCapable bool
+
+// HyperThreadingEnabled indicates whether the package has hyper-threading enabled.
+var HyperThreadingEnabled bool
 
 // Vendor is the package vendor's name.
 var Vendor string
@@ -41,15 +44,24 @@ var MaxProcs uint32
 // OnlnProcs is the number of logical processors that are on line.
 var OnlnProcs uint32
 
-// PhysicalCores is the number of physical cores in the package.
-var PhysicalCores uint32
+// PhysicalCoresConf is the number of physical cores configured in the package.
+var PhysicalCoresConf uint32
 
-// LogicalProcs is the maximum addressable logical processors in the package,
+// PhysicalCoresPkg is the number of physical cores in the package.
+var PhysicalCoresPkg uint32
+
+// LogicalProcsConf is the number of logical processors configured in the package.
+var LogicalProcsConf uint32
+
+// LogicalProcsPkg is the maximum number of addressable logical processors in the package,
 // but not necessarily occupied by a logical processors
-var LogicalProcs uint32
+var LogicalProcsPkg uint32
 
-// HyperThreadingProcs is the number of hyper-threading logical processors in the package.
-var HyperThreadingProcs uint32
+// HyperThreadingProcsConf is the number of hyper-threading logical processors configured in the package.
+var HyperThreadingProcsConf uint32
+
+// HyperThreadingProcsPkg is the number of hyper-threading logical processors available in the package.
+var HyperThreadingProcsPkg uint32
 
 // Error reports if an error occurred during the information gathering process.
 // TODO: Needs to be fine grained so the caller knows where the error occurred
@@ -91,19 +103,29 @@ func utos(a uint32) string {
 	return fmt.Sprintf("%s", b)
 }
 
+// mask_gen returns the bit field width representation of the value x.
 func mask_width(x uint32) uint32 {
-	if x == 0 { return 0 }
 	return ^(0xFFFFFFFF<<x)
+}
+
+func bits_set(x uint32) uint32 {
+	x = x - ((x >> 1) & 0x55555555);
+	x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
+	return ((x + (x >> 4) & 0xF0F0F0F) * 0x1010101) >> 24
 }
 
 // CpuParams
 func CpuParams() bool {
-	Pkgs = 1
+	Processors = 1
 	HardwareThreading = false
-	HyperThreading = false
-	PhysicalCores = 1
-	LogicalProcs = 1
-	HyperThreadingProcs = 0
+	HyperThreadingCapable = false
+	HyperThreadingEnabled = false
+	PhysicalCoresConf = 1
+	PhysicalCoresPkg = 1
+	LogicalProcsConf = 1
+	LogicalProcsPkg = 1
+	HyperThreadingProcsConf = 0
+	HyperThreadingProcsPkg = 0
 	MaxProcs = ConfProcs()
 	OnlnProcs = OnlineProcs()
 	// cpuid check
@@ -121,32 +143,52 @@ func CpuParams() bool {
 		CpuidRestricted = true
 		return false
 	}
+	// A package's hardware capability may be different from its configuration
 	// HardwareThreading enabled
 	cpuid(&r, 1, 0)
 	if r.edx>>28&1 != 0 {
 		HardwareThreading = true
 	}
 	if !HardwareThreading { return false } // single core but no HyperThreading
-	LogicalProcs = r.ebx >> 16 & 0xFF
+	LogicalProcsPkg = r.ebx >> 16 & 0xFF
 	apicid := r.ebx >> 24 & 0xFF
 	if Vendor == "GenuineIntel" {
 		cpuid(&r, 4, 0)
-		PhysicalCores = (r.eax >> 26 & 0x3F) + 1
+		PhysicalCoresPkg = (r.eax >> 26 & 0x3F) + 1
 	} else if Vendor == "AuthenticAMD" {
 		cpuid(&r, 0x80000008, 0)
-		PhysicalCores = (r.ecx & 0xFF) + 1
+		PhysicalCoresPkg = (r.ecx & 0xFF) + 1
 	} else {
 		Error = true
 		return false
 	}
-	// HardwareThreading and HyperThreading enabled
-	smtid_mask := mask_width(LogicalProcs-PhysicalCores)
-	if smtid_mask > 0 {
-		HyperThreading = true
-		HyperThreadingProcs = PhysicalCores * (apicid & smtid_mask)
+	// three level topology
+	var smt_cnt uint32
+	apicid_tmp := apicid
+	if LogicalProcsPkg < PhysicalCoresPkg { LogicalProcsPkg = PhysicalCoresPkg /* a problem if it happens(?) */ }
+	if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
+		HyperThreadingCapable = true
+		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
+		smtid_mask := mask_width(HyperThreadingProcsPkg)
+		smt_cnt = (apicid_tmp & smtid_mask) + 1
+		apicid_tmp = apicid_tmp >> bits_set(smtid_mask)
 	}
+	if PhysicalCoresPkg > 0 {
+		coreid_mask := mask_width(PhysicalCoresPkg)
+		PhysicalCoresConf = (apicid_tmp & coreid_mask) + 1
+		apicid_tmp = apicid_tmp >> bits_set(coreid_mask)
+	}
+	if smt_cnt > 0 {
+		HyperThreadingEnabled = true
+		HyperThreadingProcsConf = PhysicalCoresConf * smt_cnt
+	}
+	LogicalProcsConf = PhysicalCoresConf + HyperThreadingProcsConf
+	Processors = apicid_tmp + 1
 	return false
 }
+/*
+
+*/
 
 func init() {
 	CpuParams()
