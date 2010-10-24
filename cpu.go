@@ -12,6 +12,10 @@ import (
 	"unsafe"
 )
 
+
+// Pkgs is the number of physical processors that plug in to a socket.
+var Pkgs uint32
+
 // CpuidPresent indicates whether the cpuid instruction is present.
 var CpuidPresent bool
 
@@ -20,7 +24,7 @@ var CpuidPresent bool
 var CpuidRestricted bool
 
 // HardwareThreading indicates whether hardware multi-threading is supported,
-// can be hyper-threading and/or multiple physical cores.
+// can be hyper-threading and/or multiple physical cores within a package.
 var HardwareThreading bool
 
 // HyperThreading indicates whether hyper-threading is enabled.
@@ -50,11 +54,6 @@ var HyperThreadingProcs uint32
 // Error reports if an error occurred during the information gathering process.
 // TODO: Needs to be fine grained so the caller knows where the error occurred
 var Error bool
-
-var Pkgs uint32
-
-// PkgCnt is the number of physical packages in the system.
-//var PkgCnt          uint32
 
 type regs struct {
 	eax uint32
@@ -127,7 +126,7 @@ func CpuParams() bool {
 	if r.edx>>28&1 != 0 {
 		HardwareThreading = true
 	}
-	if !HardwareThreading { return false } // single core and no HyperThreading
+	if !HardwareThreading { return false } // single core but no HyperThreading
 	LogicalProcs = r.ebx >> 16 & 0xFF
 	apicid := r.ebx >> 24 & 0xFF
 	if Vendor == "GenuineIntel" {
@@ -140,7 +139,7 @@ func CpuParams() bool {
 		Error = true
 		return false
 	}
-	// HyperThreading enabled and HardwareThreading logical processors
+	// HardwareThreading and HyperThreading enabled
 	smtid_mask := mask_width(LogicalProcs-PhysicalCores)
 	if smtid_mask > 0 {
 		HyperThreading = true
