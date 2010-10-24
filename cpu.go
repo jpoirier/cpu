@@ -159,26 +159,31 @@ func CpuParams() bool {
 		return false
 	}
 	// three level topology
-	var smt_cnt uint32
+	var smt_id, core_id, pkg_id uint32
 	apicid_tmp := apicid
 	if LogicalProcsPkg < PhysicalCoresPkg { LogicalProcsPkg = PhysicalCoresPkg /* a problem if it happens(?) */ }
 	if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
 		HyperThreadingEnabled = true
 		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
 		smtid_mask := mask_width(HyperThreadingProcsPkg)
-		smt_cnt = (apicid_tmp & smtid_mask) + 1
+		smt_id = (apicid_tmp & smtid_mask) + 1
 		apicid_tmp = apicid_tmp >> bits_set(smtid_mask)
 	}
 	if PhysicalCoresPkg > 0 {
 		coreid_mask := mask_width(PhysicalCoresPkg)
-		PhysicalCoresConf = (apicid_tmp & coreid_mask) + 1
+		core_id = (apicid_tmp & coreid_mask) + 1
 		apicid_tmp = apicid_tmp >> bits_set(coreid_mask)
 	}
-	if HyperThreadingEnabled {
-		HyperThreadingProcsConf = PhysicalCoresConf * smt_cnt
-	}
-	LogicalProcsConf = PhysicalCoresConf + HyperThreadingProcsConf
-	Processors = apicid_tmp + 1
+
+//	if HyperThreadingEnabled {
+//		HyperThreadingProcsConf = PhysicalCoresConf * smt_cnt
+//	}
+//	LogicalProcsConf = PhysicalCoresConf + HyperThreadingProcsConf
+	pkg_id = apicid_tmp
+fmt.Printf("apicid: 0x%X\n", apicid)
+fmt.Println("smt_id : ", smt_id)
+fmt.Println("core_id : ", core_id)
+fmt.Println("pkg_id : ", pkg_id)
 	return false
 }
 /*

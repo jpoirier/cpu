@@ -3,8 +3,8 @@ Description
 
     cpu package reports processor topology information
 
-    Note that the term package refers to a physical processor.
-    nand system refers to multiple packages. Also, a processor's
+    Note that the term package refers to a physical processor
+    and system refers to multiple packages. Also, a processor's
     hardware capability may differ from its configuration.
 
 Usage
