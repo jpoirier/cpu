@@ -29,14 +29,6 @@ func main() {
 	fmt.Println("hyper-threading enabled                                   : ", cpu.HyperThreadingEnabled)
 	fmt.Println("hyper-threading logical processors per physical processor : ", cpu.HyperThreadingProcsPkg)
 
-//	fmt.Println("\n    --- processor hardware configuration ---")
-//	fmt.Println("logical processors configured                            : ", cpu.LogicalProcsConf)
-//	fmt.Println("physical cores configured                                : ", cpu.PhysicalCoresConf)
-//	fmt.Println("hyper-threading processors configured                    : ", cpu.HyperThreadingProcsConf)
-
-	fmt.Println("")
-	fmt.Println("errors during system interrogation                       : ", cpu.Error)
-
 	// show the exported fnctions for completeness
 	fmt.Println("")
 	fmt.Println("on line logical processors in the system                  : ", cpu.OnlineProcs())

@@ -60,10 +60,6 @@ var HyperThreadingProcsConf uint32
 // HyperThreadingProcsPkg is the number of hyper-threading logical processors available in the package.
 var HyperThreadingProcsPkg uint32
 
-// Error reports if an error occurred during the information gathering process.
-// TODO: Needs to be fine grained so the caller knows where the error occurred
-var Error bool
-
 type regs struct {
 	eax uint32
 	ebx uint32
@@ -100,19 +96,8 @@ func utos(a uint32) string {
 	return fmt.Sprintf("%s", b)
 }
 
-// mask_gen returns the bit field width representation of the value x.
-func mask_width(x uint32) uint32 {
-	return ^(0xFFFFFFFF<<x)
-}
-
-func bits_set(x uint32) uint32 {
-	x = x - ((x >> 1) & 0x55555555);
-	x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
-	return ((x + (x >> 4) & 0xF0F0F0F) * 0x1010101) >> 24
-}
-
-// CpuParams
-func CpuParams() bool {
+// Params
+func Params() {
 	Processors = 1
 	HardwareThreading = false
 	HyperThreadingEnabled = false
@@ -122,32 +107,38 @@ func CpuParams() bool {
 	LogicalProcsPkg = 1
 	HyperThreadingProcsConf = 0
 	HyperThreadingProcsPkg = 0
+	Vendor = "Unknown"
+
 	MaxProcs = ConfProcs()
 	OnlnProcs = OnlineProcs()
+
 	// cpuid check
 	CpuidPresent = have_cpuid()
-	if !CpuidPresent { return false }
+	if !CpuidPresent { return }
+
 	// vendor name
 	var r regs
 	cpuid(&r, 0, 0)
 	maxCpuid := r.eax
 	Vendor = utos(r.ebx) + utos(r.edx) + utos(r.ecx)
+
 	// restricted cpuid execution
 	CpuidRestricted = false
 	cpuid(&r, 0x80000000, 0)
 	if maxCpuid<=4 && r.eax>0x80000004 {
 		CpuidRestricted = true
-		return false
+		return
 	}
+
 	// A package's hardware capability may be different from its configuration
 	// HardwareThreading enabled
 	cpuid(&r, 1, 0)
 	if r.edx>>28&1 != 0 {
 		HardwareThreading = true
 	}
-	if !HardwareThreading { return false } // single core but no HyperThreading
+	if !HardwareThreading { return } // single core but no HyperThreading
+
 	LogicalProcsPkg = r.ebx >> 16 & 0xFF
-	apicid := r.ebx >> 24 & 0xFF
 	if Vendor == "GenuineIntel" {
 		cpuid(&r, 4, 0)
 		PhysicalCoresPkg = (r.eax >> 26 & 0x3F) + 1
@@ -155,41 +146,11 @@ func CpuParams() bool {
 		cpuid(&r, 0x80000008, 0)
 		PhysicalCoresPkg = (r.ecx & 0xFF) + 1
 	} else {
-		Error = true
-		return false
+		return
 	}
-	// three level topology
-	var smt_id, core_id, pkg_id uint32
-	apicid_tmp := apicid
-	if LogicalProcsPkg < PhysicalCoresPkg { LogicalProcsPkg = PhysicalCoresPkg /* a problem if it happens(?) */ }
-	if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
-		HyperThreadingEnabled = true
-		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
-		smtid_mask := mask_width(HyperThreadingProcsPkg)
-		smt_id = (apicid_tmp & smtid_mask) + 1
-		apicid_tmp = apicid_tmp >> bits_set(smtid_mask)
-	}
-	if PhysicalCoresPkg > 0 {
-		coreid_mask := mask_width(PhysicalCoresPkg)
-		core_id = (apicid_tmp & coreid_mask) + 1
-		apicid_tmp = apicid_tmp >> bits_set(coreid_mask)
-	}
-
-//	if HyperThreadingEnabled {
-//		HyperThreadingProcsConf = PhysicalCoresConf * smt_cnt
-//	}
-//	LogicalProcsConf = PhysicalCoresConf + HyperThreadingProcsConf
-	pkg_id = apicid_tmp
-fmt.Printf("apicid: 0x%X\n", apicid)
-fmt.Println("smt_id : ", smt_id)
-fmt.Println("core_id : ", core_id)
-fmt.Println("pkg_id : ", pkg_id)
-	return false
+	return
 }
-/*
-
-*/
 
 func init() {
-	CpuParams()
+	Params()
 }
