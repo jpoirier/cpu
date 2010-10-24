@@ -4,12 +4,8 @@ Description
     cpu package reports processor topology information
 
     Note that the term package refers to a physical processor.
-    nand system refers to multiple packages.
-
-    A processor's hardware capability may be different from its
-    configuration. For example, a processor may be multiple-core
-    capable but not multiple-core configured and a physical core
-    may be hyper-thread capable but not hyper-thread configued.
+    nand system refers to multiple packages. Also, a processor's
+    hardware capability may differ from its configuration.
 
 Usage
 -----

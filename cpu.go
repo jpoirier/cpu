@@ -27,9 +27,6 @@ var CpuidRestricted bool
 // can be hyper-threading and/or multiple physical cores within a package.
 var HardwareThreading bool
 
-// HyperThreadingCapable indicates whether the package is hyper-threading capable.
-var HyperThreadingCapable bool
-
 // HyperThreadingEnabled indicates whether the package has hyper-threading enabled.
 var HyperThreadingEnabled bool
 
@@ -118,7 +115,6 @@ func bits_set(x uint32) uint32 {
 func CpuParams() bool {
 	Processors = 1
 	HardwareThreading = false
-	HyperThreadingCapable = false
 	HyperThreadingEnabled = false
 	PhysicalCoresConf = 1
 	PhysicalCoresPkg = 1
@@ -167,7 +163,7 @@ func CpuParams() bool {
 	apicid_tmp := apicid
 	if LogicalProcsPkg < PhysicalCoresPkg { LogicalProcsPkg = PhysicalCoresPkg /* a problem if it happens(?) */ }
 	if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
-		HyperThreadingCapable = true
+		HyperThreadingEnabled = true
 		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
 		smtid_mask := mask_width(HyperThreadingProcsPkg)
 		smt_cnt = (apicid_tmp & smtid_mask) + 1
@@ -178,8 +174,7 @@ func CpuParams() bool {
 		PhysicalCoresConf = (apicid_tmp & coreid_mask) + 1
 		apicid_tmp = apicid_tmp >> bits_set(coreid_mask)
 	}
-	if smt_cnt > 0 {
-		HyperThreadingEnabled = true
+	if HyperThreadingEnabled {
 		HyperThreadingProcsConf = PhysicalCoresConf * smt_cnt
 	}
 	LogicalProcsConf = PhysicalCoresConf + HyperThreadingProcsConf

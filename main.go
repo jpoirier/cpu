@@ -12,7 +12,7 @@ import (
 
 func main() {
 	fmt.Println("\nAn OS views physical cores and hyper-threads as logical processors \nin a multi-package, multi-core, multi-threading environment.")
-	fmt.Println("Note that the term package refers to a physical processor\nand system refers to multiple packages\n")
+	fmt.Println("Note that the term package refers to a physical processor\nand system refers to multiple packages.\n")
 
 	fmt.Println("physical processors (aka packages)                        : ", cpu.Processors)
 	fmt.Println("on line logical processors in the system                  : ", cpu.OnlnProcs) // also via cpu.OnlineProcs()
@@ -21,7 +21,6 @@ func main() {
 	fmt.Println("cpuid present                                             : ", cpu.CpuidPresent)
 	fmt.Println("cpuid restricted                                          : ", cpu.CpuidRestricted)
 	fmt.Println("hardware-threading supported                              : ", cpu.HardwareThreading)
-	fmt.Println("hyper-threading capable                                   : ", cpu.HyperThreadingCapable)
 	fmt.Println("vendor name                                               : ", cpu.Vendor)
 
 	fmt.Println("\n    --- processor hardware capability  ---")
