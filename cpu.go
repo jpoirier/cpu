@@ -91,8 +91,10 @@ func cpuid(r *regs, f1, f2 uint32) {
 // utos returns a converted to a string.
 func utos(a uint32) string {
 	var b [4]byte
-	b[0] = byte(a >>  0); b[1] = byte(a >>  8);
-	b[2] = byte(a >> 16); b[3] = byte(a >> 24)
+	b[0] = byte(a >> 0)
+	b[1] = byte(a >> 8)
+	b[2] = byte(a >> 16)
+	b[3] = byte(a >> 24)
 	return fmt.Sprintf("%s", b)
 }
 
@@ -114,7 +116,9 @@ func Params() {
 
 	// cpuid check
 	CpuidPresent = have_cpuid()
-	if !CpuidPresent { return }
+	if !CpuidPresent {
+		return
+	}
 
 	// vendor name
 	var r regs
@@ -125,7 +129,7 @@ func Params() {
 	// restricted cpuid execution
 	CpuidRestricted = false
 	cpuid(&r, 0x80000000, 0)
-	if maxCpuid<=4 && r.eax>0x80000004 {
+	if maxCpuid <= 4 && r.eax > 0x80000004 {
 		CpuidRestricted = true
 		return
 	}
@@ -133,10 +137,12 @@ func Params() {
 	// A package's hardware capability may be different from its configuration
 	// HardwareThreading enabled
 	cpuid(&r, 1, 0)
-	if r.edx>>28&1 != 0 {
+	if r.edx >> 28 & 1 != 0 {
 		HardwareThreading = true
 	}
-	if !HardwareThreading { return } // single core but no HyperThreading
+	if !HardwareThreading {
+		return
+	} // single core but no HyperThreading
 
 	LogicalProcsPkg = r.ebx >> 16 & 0xFF
 	if Vendor == "GenuineIntel" {
@@ -147,6 +153,13 @@ func Params() {
 		PhysicalCoresPkg = (r.ecx & 0xFF) + 1
 	} else {
 		return
+	}
+	if LogicalProcsPkg < PhysicalCoresPkg {
+		LogicalProcsPkg = PhysicalCoresPkg /* a problem if it happens(?) */
+	}
+	if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
+		HyperThreadingEnabled = true
+		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
 	}
 	return
 }

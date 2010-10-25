@@ -29,7 +29,7 @@ func main() {
 	fmt.Println("hyper-threading enabled                                   : ", cpu.HyperThreadingEnabled)
 	fmt.Println("hyper-threading logical processors per physical processor : ", cpu.HyperThreadingProcsPkg)
 
-	// show the exported fnctions for completeness
+	// show the exported functions for completeness
 	fmt.Println("")
 	fmt.Println("on line logical processors in the system                  : ", cpu.OnlineProcs())
 	fmt.Println("maximum logical processors in the system                  : ", cpu.ConfProcs())
