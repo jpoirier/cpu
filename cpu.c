@@ -9,6 +9,16 @@
 # include <sys/param.h>
 # include <sys/sysctl.h>
 # include <unistd.h>
+# ifndef __SIZE_T
+#  define __SIZE_T
+   typedef unsigned int size_t;
+#  endif
+# ifndef _SC_NPROCESSORS_ONLN
+#  define _SC_NPROCESSORS_ONLN (-1)
+# endif
+# ifndef _SC_NPROCESSORS_CONF
+#  define _SC_NPROCESSORS_CONF (-1)
+# endif
 #else
 # error "Invalid GOOS: must be darwin, freebsd, linux, or windows"
 #endif
@@ -35,7 +45,7 @@ uint32_t eflg_chks[2] = {CHK_386, CHK_486};
 
 bool have_cpuid(void) {
 #if defined(__386__) && !defined(__AMD64__)
-    uint32_t a, b: int32_t j, i;
+    uint32_t a, b; int32_t i, j;
     for (i = 0; i < 2; i++) {
         j = eflg_chks[i];
         __asm__ __volatile__ (
@@ -50,11 +60,11 @@ bool have_cpuid(void) {
             "movl %%eax, %1\n\t"
             "pushl %0\n\t"
             "popfl\n"
-            : "r="(a), "r="(b)
+            : "=r"(a), "=r"(b)
             : "r"(j)
             : "eax"
         );
-        if ((a & j) != (b & j)
+        if ((a & j) != (b & j))
             return false;
     }
 #endif
@@ -114,7 +124,7 @@ uint32_t confProcs(void) {
 	return (uint32_t) sysinfo.dwNumberOfProcessors;
 #else
     int x;
-    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) == -1) { x = onlineProcs(); }
+    if ((x = sysconf(_SC_NPROCESSORS_CONF)) == -1) { x = onlineProcs(); }
 	return (uint32_t) x;
 #endif
 }
