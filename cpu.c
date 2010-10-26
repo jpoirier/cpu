@@ -6,13 +6,10 @@
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 #elif defined(__LINUX__) || defined(__DARWIN__) || defined(__FREEBSD__)
+# include <stdlib.h>
 # include <sys/param.h>
 # include <sys/sysctl.h>
 # include <unistd.h>
-# ifndef __SIZE_T
-#  define __SIZE_T
-   typedef unsigned int size_t;
-#  endif
 # ifndef _SC_NPROCESSORS_ONLN
 #  define _SC_NPROCESSORS_ONLN (-1)
 # endif
