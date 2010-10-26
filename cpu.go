@@ -155,12 +155,15 @@ func Params() {
 		return
 	}
 	if LogicalProcsPkg < PhysicalCoresPkg {
-		LogicalProcsPkg = PhysicalCoresPkg /* a problem if it happens(?) */
+		LogicalProcsPkg = PhysicalCoresPkg // a problem if it happens(?)
 	}
 	if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
 		HyperThreadingEnabled = true
 		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
 	}
+
+	// assumption is an SMP system
+	Processors = MaxProcs / LogicalProcsPkg
 	return
 }
 
