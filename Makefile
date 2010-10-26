@@ -30,7 +30,6 @@ else
 $(error Invalid $$GOARCH '$(GOARCH)'; must be 386 or amd64)
 endif
 
-
 CGO_LDFLAGS=cpu.so $(LDPATH_$(GOOS))
 CGO_DEPS=cpu.so
 
@@ -38,7 +37,7 @@ CLEANFILES +=main$(EXT)
 include $(GOROOT)/src/Make.pkg
 
 cpu.o: cpu.c
-	gcc $(_CGO_CFLAGS_$(GOARCH)) -g -c -fPIC $(CFLAGS) cpu.c
+	gcc $(_CGO_CFLAGS_$(GOARCH)) -g -c -O3 -fomit-frame-pointer -fPIC $(CFLAGS) cpu.c
 
 cpu.so: cpu.o
 	gcc $(_CGO_CFLAGS_$(GOARCH)) -o $@ cpu.o $(_CGO_LDFLAGS_$(GOOS))

@@ -22,13 +22,6 @@
 
 #include "cpu.h"
 
-#if defined(__386__) && !defined(__AMD64__)
-/* eflag register checks, upper and lower boundaries */
-#define CHK_386 (0x040000)
-#define CHK_486 (0x200000)
-uint32_t eflg_chks[2] = {CHK_386, CHK_486};
-#endif
-
 #if defined(__DARWIN__)
 #define MIB_0   CTL_HW
 #define MIB_1   HW_AVAILCPU
@@ -41,31 +34,27 @@ uint32_t eflg_chks[2] = {CHK_386, CHK_486};
 
 
 bool have_cpuid(void) {
+    uint32_t a = true;
 #if defined(__386__) && !defined(__AMD64__)
-    uint32_t a, b; int32_t i, j;
-    for (i = 0; i < 2; i++) {
-        j = eflg_chks[i];
-        __asm__ __volatile__ (
-            "pushfl\n\t"
-            "popl %%eax\n\t"
-            "movl %%eax, %0\n\t"
-            "xorl %3, %%eax\n\t"
-            "pushl %%eax\n\t"
-            "popfl\n\t"
-            "pushfl\n\t"
-            "popl %%eax\n\t"
-            "movl %%eax, %1\n\t"
-            "pushl %0\n\t"
-            "popfl\n"
-            : "=r"(a), "=r"(b)
-            : "r"(j)
-            : "eax"
-        );
-        if ((a & j) != (b & j))
-            return false;
-    }
+    __asm__ __volatile__ (
+        "pushfl\n\t"
+        "popl %%eax\n\t"
+        "movl %%eax, %%ecx\n\t"
+        "xorl $0x200000, %%eax\n\t"
+        "pushl %%eax\n\t"
+        "popfl\n\t"
+        "pushfl\n\t"
+        "popl %%eax\n\t"
+        "xorl %%ecx, %%eax\n\t"
+        "shrl $21, %%eax\n\t"
+        "andl $1, %%eax\n\t"
+        "movl %%eax, %0\n\t"
+        : "=r"(a)
+        :
+        : "eax", "ecx"
+    );
 #endif
-    return true;
+    return a;
 }
 
 void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
@@ -79,7 +68,7 @@ void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
         "movl %%eax, %0\n\t"
         "movl %%ebx, %1\n\t"
         "movl %%ecx, %2\n\t"
-        "movl %%edx, %3\n"
+        "movl %%edx, %3\n\t"
 #if defined(__386__) && !defined(__AMD64__)
         "popl %%ebx\n\t"
 #endif
