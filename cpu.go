@@ -63,7 +63,7 @@ var HyperThreadingProcsConf uint32
 // HyperThreadingProcsPkg is the number of hyper-threading logical processors available in the package.
 var HyperThreadingProcsPkg uint32
 
-var ProcessorName string
+var ProcessorFamily string
 
 var ProcessorL2Cache uint32
 
@@ -136,7 +136,7 @@ func Params() {
 	HyperThreadingProcsPkg = 0
 	ProcessorL2Cache = 0
 	ProcessorL2CacheLine = 0
-	ProcessorName = "Unknown"
+	ProcessorFamily = "Unknown"
 	Vendor = "Unknown"
 //	CpuidRestricted = false
 	LogicalProcsSharingCache = 0
@@ -168,11 +168,11 @@ func Params() {
 
 	if maxExtLevel >= 0x80000004 {
 		Cpuid(&r, 0x80000002, 0)
-		ProcessorName = utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
+		ProcessorFamily = utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
 		Cpuid(&r, 0x80000003, 0)
-		ProcessorName += utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
+		ProcessorFamily += utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
 		Cpuid(&r, 0x80000004, 0)
-		ProcessorName += utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
+		ProcessorFamily += utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
 	}
 
 	if maxExtLevel >= 0x80000006 {
