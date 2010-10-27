@@ -19,8 +19,11 @@ func main() {
 	fmt.Println("maximum logical processors in the system                  : ", cpu.MaxProcs) // also via cpu.ConfProcs()
 
 	fmt.Println("cpuid present                                             : ", cpu.CpuidPresent)
-	fmt.Println("cpuid restricted                                          : ", cpu.CpuidRestricted)
+//	fmt.Println("cpuid restricted                                          : ", cpu.CpuidRestricted)
 	fmt.Println("hardware-threading supported                              : ", cpu.HardwareThreading)
+	fmt.Println("processor L2 cache line size (bytes)                      : ", cpu.ProcessorL2CacheLine)
+	fmt.Println("processor L2 cache size (bytes)                           : ", cpu.ProcessorL2Cache)
+	fmt.Println("processor name                                            : ", cpu.ProcessorName)
 	fmt.Println("vendor name                                               : ", cpu.Vendor)
 
 	fmt.Println("\n    --- processor hardware capability  ---")

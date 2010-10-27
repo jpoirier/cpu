@@ -21,7 +21,7 @@ var CpuidPresent bool
 
 // CpuidRestricted indicates whether the cpuid instruction is restricted,
 // i.e. not executable.
-var CpuidRestricted bool
+//var CpuidRestricted bool
 
 // HardwareThreading indicates whether hardware multi-threading is supported,
 // can be hyper-threading and/or multiple physical cores within a package.
@@ -54,6 +54,7 @@ var LogicalProcsConf uint32
 // but not necessarily occupied by a logical processors
 var LogicalProcsPkg uint32
 
+// LogicalProcsSharingCache
 var LogicalProcsSharingCache uint32
 
 // HyperThreadingProcsConf is the number of hyper-threading logical processors configured in the package.
@@ -61,6 +62,13 @@ var HyperThreadingProcsConf uint32
 
 // HyperThreadingProcsPkg is the number of hyper-threading logical processors available in the package.
 var HyperThreadingProcsPkg uint32
+
+var ProcessorName string
+
+var ProcessorL2Cache uint32
+
+var ProcessorL2CacheLine uint32
+
 
 type regs struct {
 	eax uint32
@@ -84,9 +92,9 @@ func have_cpuid() bool {
 	return bool(C.have_cpuid())
 }
 
-// cpuid executes the function f1 and sub function f2, the output
+// Cpuid executes the EAX function f1 and ECX sub function f2, the output
 // registers from the operation returned in r.
-func cpuid(r *regs, f1, f2 uint32) {
+func Cpuid(r *regs, f1, f2 uint32) {
 	C.cpuid((*C.regs_t)(unsafe.Pointer(r)), C.uint32_t(f1), C.uint32_t(f2))
 }
 
@@ -126,8 +134,11 @@ func Params() {
 	LogicalProcsPkg = 1
 	HyperThreadingProcsConf = 0
 	HyperThreadingProcsPkg = 0
+	ProcessorL2Cache = 0
+	ProcessorL2CacheLine = 0
+	ProcessorName = "Unknown"
 	Vendor = "Unknown"
-	CpuidRestricted = false
+//	CpuidRestricted = false
 	LogicalProcsSharingCache = 0
 
 	MaxProcs = ConfProcs()
@@ -141,19 +152,34 @@ func Params() {
 
 	// vendor name
 	var r regs
-	cpuid(&r, 0, 0)
-//	maxStdLevel := r.eax
+	Cpuid(&r, 0, 0)
+	maxStdLevel := r.eax
 	Vendor = utos(r.ebx) + utos(r.edx) + utos(r.ecx)
 
-	cpuid(&r, 0x80000000, 0)
-//	maxExtLevel = r.eax
+	Cpuid(&r, 0x80000000, 0)
+	maxExtLevel := r.eax
 
-// XXX: validate this check!
-	// restricted cpuid execution
-//	if maxStdLevel <= 4 && maxExtLevel > 0x80000004 {
-//		CpuidRestricted = true
-//		return
-//	}
+	// this check includes some old processors (P4 & M, Old Xeon)
+	// that we could report processor name on but probably not
+	// worth the time
+	if maxStdLevel < 5  {
+		return
+	}
+
+	if maxExtLevel >= 0x80000004 {
+		Cpuid(&r, 0x80000002, 0)
+		ProcessorName = utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
+		Cpuid(&r, 0x80000003, 0)
+		ProcessorName += utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
+		Cpuid(&r, 0x80000004, 0)
+		ProcessorName += utos(r.eax) + utos(r.ebx) + utos(r.ecx) + utos(r.edx)
+	}
+
+	if maxExtLevel >= 0x80000006 {
+		Cpuid(&r, 0x80000006, 0)
+		ProcessorL2CacheLine = (r.ecx & 0xFF) * 1024
+		ProcessorL2Cache = (r.ecx >> 16) & 0xFFFF
+	}
 
 	// The hardware capability of a package may be different from its configuration.
 	// A package may be capable of addressing multiple logical processors,
@@ -163,14 +189,14 @@ func Params() {
 	// other cores. Multi-core processors are distinguished by their level of
 	// integration. Do AMD processors also do core multi-processing?
 
-	cpuid(&r, 1, 0)
+	Cpuid(&r, 1, 0)
 	if r.edx >> 28 & 1 == 0 {
 		return // single core and no Hhardware-threading
 	}
 
 	if Vendor == "GenuineIntel" {
 		LogicalProcsPkg = r.ebx >> 16 & 0xFF
-		cpuid(&r, 4, 0)
+		Cpuid(&r, 4, 0)
 		PhysicalCoresPkg = (r.eax >> 26 & 0x3F) + 1
 		LogicalProcsSharingCache = (r.eax >> 14 & 0xFFF) + 1
 
@@ -178,7 +204,7 @@ func Params() {
 			HardwareThreading = true
 		}
 	} else if Vendor == "AuthenticAMD" {
-		cpuid(&r, 0x80000008, 0)
+		Cpuid(&r, 0x80000008, 0)
 		apicid_sz := (r.ecx >> 12) & 0xF
 		LogicalProcsPkg = (r.ecx & 0xFF) + 1
 
@@ -189,7 +215,7 @@ func Params() {
 		}
 	} else {
 // TODO: abort? handle other vendors
-		return
+		panic("Unknown processor...")
 	}
 
 	if LogicalProcsPkg < PhysicalCoresPkg {
