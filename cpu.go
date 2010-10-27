@@ -177,8 +177,8 @@ func Params() {
 
 	if maxExtLevel >= 0x80000006 {
 		Cpuid(&r, 0x80000006, 0)
-		ProcessorL2CacheLine = (r.ecx & 0xFF) * 1024
-		ProcessorL2Cache = (r.ecx >> 16) & 0xFFFF
+		ProcessorL2CacheLine = (r.ecx & 0xFF)
+		ProcessorL2Cache = ((r.ecx >> 16) & 0xFFFF) * 1024
 	}
 
 	// The hardware capability of a package may be different from its configuration.
