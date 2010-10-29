@@ -12,6 +12,7 @@ import (
 	"unsafe"
 )
 
+var PackageVersion string = "v0.13.1"
 
 // Processors is the number of physical processors (that plug in to a socket).
 var Processors uint32
@@ -187,11 +188,11 @@ func Params() {
 	// core multi-processing is enabled. E.g. each core in an Athlon 64 X2
 	// multi-core CPU is its own distinct processor and shares no esources with
 	// other cores. Multi-core processors are distinguished by their level of
-	// integration. Do AMD processors also do core multi-processing?
+	// integration. Do AMD processors also have core multi-processing?
 
 	Cpuid(&r, 1, 0)
 	if r.edx >> 28 & 1 == 0 {
-		return // single core and no Hhardware-threading
+		return // single core and no hardware-threading
 	}
 
 	if Vendor == "GenuineIntel" {

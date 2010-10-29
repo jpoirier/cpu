@@ -14,6 +14,8 @@ func main() {
 	fmt.Println("\nAn OS views physical cores and hyper-threads as logical processors \nin a multi-package, multi-core, multi-threading environment.")
 	fmt.Println("Note that the term package refers to a physical processor\nand system refers to multiple packages.\n")
 
+	fmt.Printf("              ----------- %s -----------\n", cpu.PackageVersion)
+
 	fmt.Println("physical processors (aka packages)                        : ", cpu.Processors)
 	fmt.Println("on line logical processors in the system                  : ", cpu.OnlnProcs) // also via cpu.OnlineProcs()
 	fmt.Println("maximum logical processors in the system                  : ", cpu.MaxProcs) // also via cpu.ConfProcs()
