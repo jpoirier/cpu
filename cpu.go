@@ -186,7 +186,7 @@ func Params() {
 	// A package may be capable of addressing multiple logical processors,
 	// in the case of multiple cores, but that's not a good indication that
 	// core multi-processing is enabled. E.g. each core in an Athlon 64 X2
-	// multi-core CPU is its own distinct processor and shares no esources with
+	// multi-core CPU is its own distinct processor and shares no resources with
 	// other cores. Multi-core processors are distinguished by their level of
 	// integration. Do AMD processors also have core multi-processing?
 

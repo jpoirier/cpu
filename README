@@ -13,11 +13,11 @@ Usage
 
 Compiling
 ---------
-    make install  builds and installs the package
+    make  builds and installs the package and creates an example program
 
 Testing
 -------
-    make main  builds and installs the package and creates the example file main
+    run the example program
 
 TODO
 ----
