@@ -13,7 +13,9 @@ Usage
 
 Compiling
 ---------
-    make  builds and installs the package and creates an example program
+    make          builds the package
+    make install  builds and installs the package
+    make cpu      builds, installs the package, and creates the example program
 
 Testing
 -------
@@ -30,14 +32,14 @@ Misc
 - Core refers to a physical sub-system of a package. A core may contain 1 or more
   logical processors
 - A logical processor refers to a hardware resource that can execute a single thread
-- Hyperthreading refers to the technology that allows a processor core to provide the
+- Hyper-threading refers to the technology that allows a processor core to provide the
   functionality of more than one logical core
 - Simultaneous Multi-Threading refers to multiple logical processors within the same core
 - Multi-Core Processor contains more than one physical core
 - MultiProcessor Platform contains multiple physical sockets
 - Hardware Multithreading refers to any combination of hardware support to allow
   multithreading, which could be any combination of SMT, multi-core, and multi-processor
-- Processor Topology is the hierarchical relationship of shared vs dedicated hadrware resources
+- Processor Topology is the hierarchical relationship of shared vs dedicated hardware resources
 
 I'm currently working on code to enumerate through packages/cores/threads.
 I do development commits to the bitbucket repo but I'll be sure to make
