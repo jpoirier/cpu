@@ -23,12 +23,12 @@
 #include "cpu.h"
 
 #if defined(__DARWIN__)
-#define MIB_0   CTL_HW
-#define MIB_1   HW_AVAILCPU
+# define MIB_0   CTL_HW
+# define MIB_1   HW_AVAILCPU
 #elif defined(__LINUX__) || defined(__FREEBSD__)
 # if defined(CTL_HW) && defined(HW_NCPU)
-# define MIB_0   CTL_HW
-# define MIB_1   HW_NCPU
+#  define MIB_0   CTL_HW
+#  define MIB_1   HW_NCPU
 # endif
 #endif
 
@@ -87,17 +87,25 @@ uint32_t onlineProcs(void) {
 	return (uint32_t) conf();
 #else
     int x; uint32_t cnt; size_t sz = sizeof(cnt);
-#if defined(MIB_0) && defined(MIB_1)
+# if defined(MIB_0) && defined(MIB_1)
     int mib[2] = {MIB_0, MIB_1};
-#endif
-    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) != -1) { return (uint32_t)x; }
-#if defined(MIB_0) && defined(MIB_1)
-    if ((x = sysctl(mib, 2, &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
-#endif
-    if ((x = sysctlbyname("hw.ncpu", &cnt, &sz, NULL, 0)) != -1 ) { return (uint32_t)x; }
-#if defined(MIB_0) && defined(MIB_1)
-    if ((x = sysctlnametomib("hw.ncpu", mib, &sz)) != -1 ) { return (uint32_t)x; }
-#endif
+# endif
+    if ((x = sysconf(_SC_NPROCESSORS_ONLN)) != -1) {
+        return (uint32_t) x;
+    }
+# if defined(MIB_0) && defined(MIB_1)
+    if ((x = sysctl(mib, 2, &cnt, &sz, NULL, 0)) != -1 ) {
+        return (uint32_t) x;
+    }
+# endif
+    if ((x = sysctlbyname("hw.ncpu", &cnt, &sz, NULL, 0)) != -1 ) {
+        return (uint32_t) x;
+    }
+# if defined(MIB_0) && defined(MIB_1)
+    if ((x = sysctlnametomib("hw.ncpu", mib, &sz)) != -1 ) {
+        return (uint32_t) x;
+    }
+# endif
 	return 0;
 #endif
 }
@@ -110,7 +118,9 @@ uint32_t confProcs(void) {
 	return (uint32_t) sysinfo.dwNumberOfProcessors;
 #else
     int x;
-    if ((x = sysconf(_SC_NPROCESSORS_CONF)) == -1) { x = onlineProcs(); }
+    if ((x = sysconf(_SC_NPROCESSORS_CONF)) == -1) {
+        x = onlineProcs();
+    }
 	return (uint32_t) x;
 #endif
 }

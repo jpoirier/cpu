@@ -15,7 +15,7 @@ Compiling
 ---------
     make          builds the package
     make install  builds and installs the package
-    make cpu      builds, installs the package, and creates the example program
+    make example  builds, installs the package, and creates the example program
 
 Testing
 -------
