@@ -11,19 +11,20 @@ CLEANFILES+=example
 include $(GOROOT)/src/Make.pkg
 
 ifeq ($(GOOS),darwin)
-CGO_CFLAGS +=-D__DARWIN__
+CGO_CFLAGS+=-D__DARWIN__
 else ifeq ($(GOOS),freebsd)
-CGO_CFLAGS +=-D__FREEBSD__
+CGO_CFLAGS+=-D__FREEBSD__
 else ifeq ($(GOOS),linux)
-CGO_CFLAGS +=-D__LINUX__
+CGO_CFLAGS+=-D__LINUX__
 else ifeq ($(GOOS),windows)
-CGO_CFLAGS +=-D__WINDOWS__
+CGO_CFLAGS+=-D__WINDOWS__
 endif
 
 ifeq ($(GOARCH),amd64)
-CGO_CFLAGS +=-D__AMD64__
+CGO_CFLAGS+=-D__AMD64__
 else ifeq ($(GOARCH),386)
-CGO_CFLAGS +=-D__386__
+CGO_CFLAGS+=-D__386__
+CGO_CFLAGS+=-fomit-frame-pointer
 endif
 
 example: install example.go
