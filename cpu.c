@@ -98,9 +98,11 @@ uint32_t onlineProcs(void) {
         return (uint32_t) x;
     }
 # endif
+# if !defined(__LINUX__)
     if ((x = sysctlbyname("hw.ncpu", &cnt, &sz, NULL, 0)) != -1 ) {
         return (uint32_t) x;
     }
+# endif
 # if defined(MIB_0) && defined(MIB_1)
     if ((x = sysctlnametomib("hw.ncpu", mib, &sz)) != -1 ) {
         return (uint32_t) x;
