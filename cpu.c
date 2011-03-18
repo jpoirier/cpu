@@ -84,7 +84,7 @@ void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
 
 uint32_t onlineProcs(void) {
 #if defined(_WIN32)
-	return (uint32_t) confProcs();
+    return (uint32_t) confProcs();
 #else
     int x; uint32_t cnt; size_t sz = sizeof(cnt);
 # if defined(MIB_0) && defined(MIB_1)
@@ -108,21 +108,21 @@ uint32_t onlineProcs(void) {
         return (uint32_t) x;
     }
 # endif
-	return 0;
+    return 0;
 #endif
 }
 
 //  Number of OS configured processors
 uint32_t confProcs(void) {
 #if defined(_WIN32)
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo(&sysinfo);
-	return (uint32_t) sysinfo.dwNumberOfProcessors;
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return (uint32_t) sysinfo.dwNumberOfProcessors;
 #else
     int x;
     if ((x = sysconf(_SC_NPROCESSORS_CONF)) == -1) {
         x = onlineProcs();
     }
-	return (uint32_t) x;
+    return (uint32_t) x;
 #endif
 }
