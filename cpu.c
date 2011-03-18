@@ -84,7 +84,7 @@ void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
 
 uint32_t onlineProcs(void) {
 #if defined(__WINDOWS__)
-	return (uint32_t) conf();
+	return (uint32_t) confProcs();
 #else
     int x; uint32_t cnt; size_t sz = sizeof(cnt);
 # if defined(MIB_0) && defined(MIB_1)

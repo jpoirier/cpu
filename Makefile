@@ -8,8 +8,10 @@ CGO_OFILES=\
 	cpu.o\
 
 CLEANFILES+=example
-include $(GOROOT)/src/Make.pkg
 
+include $(GOROOT)/src/Make.pkg
+
+EXT=
 ifeq ($(GOOS),darwin)
 CGO_CFLAGS+=-D__DARWIN__
 else ifeq ($(GOOS),freebsd)
@@ -18,6 +20,7 @@ else ifeq ($(GOOS),linux)
 CGO_CFLAGS+=-D__LINUX__
 else ifeq ($(GOOS),windows)
 CGO_CFLAGS+=-D__WINDOWS__
+EXT=.exe
 endif
 
 ifeq ($(GOARCH),amd64)
@@ -29,4 +32,4 @@ endif
 
 example: install example.go
 	$(GC) example.go
-	$(LD) -o $@ example.$O
+	$(LD) -o $@$(EXT) example.$O
