@@ -5,9 +5,9 @@
 package main
 
 import (
-	"cpu"
 	"fmt"
 	"runtime"
+	"github.com/jpoirier/cpu"
 )
 
 func main() {

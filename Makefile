@@ -1,5 +1,5 @@
 include $(GOROOT)/src/Make.inc
-TARG=cpu
+TARG=github.com/jpoirier/cpu
 
 CGOFILES=\
 	cpu.go\
