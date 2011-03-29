@@ -7,14 +7,14 @@ CGOFILES=\
 CGO_OFILES=\
 	cpu.o\
 
-CLEANFILES+=example
-
-include $(GOROOT)/src/Make.pkg
-
 EXT=
 ifeq ($(GOOS),windows)
 EXT=.exe
 endif
+
+CLEANFILES+=example$(EXE)
+
+include $(GOROOT)/src/Make.pkg
 
 example: install example.go
 	$(GC) example.go

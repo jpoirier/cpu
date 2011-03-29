@@ -2,7 +2,7 @@
 // Distributable under the terms of The New BSD License
 // that can be found in the LICENSE file.
 
-#if defined(_WIN32)
+#ifdef _WIN32
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 #elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
@@ -22,7 +22,7 @@
 
 #include "cpu.h"
 
-#if defined(__APPLE__)
+#ifdef __APPLE__
 # define MIB_0   CTL_HW
 # define MIB_1   HW_AVAILCPU
 #elif defined(__linux__) || defined(__FreeBSD__)
@@ -35,7 +35,7 @@
 
 bool have_cpuid(void) {
     uint32_t a = true;
-#if defined(__i386__) && !defined(__amd64)
+#ifdef __i386__
     __asm__ __volatile__ (
         "pushfl\n\t"
         "popl %%eax\n\t"
@@ -59,8 +59,11 @@ bool have_cpuid(void) {
 
 void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
     __asm__ __volatile__ (
-#if defined(__i386__) && !defined(__amd64)
+#ifdef __i386__
         "pushl %%ebx\n\t"
+# ifdef __linux__
+        "pushl %%ecx\n\t"
+# endif
 #endif
         "movl %4, %%eax\n\t"
         "movl %5, %%ecx\n\t"
@@ -69,21 +72,27 @@ void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
         "movl %%ebx, %1\n\t"
         "movl %%ecx, %2\n\t"
         "movl %%edx, %3\n\t"
-#if defined(__i386__) && !defined(__amd64)
+#ifdef __i386__
+# ifdef __linux__
+        "popl %%ecx\n\t"
+# endif
         "popl %%ebx\n\t"
 #endif
         : "=m"(r->eax), "=m"(r->ebx), "=m"(r->ecx), "=m"(r->edx)
         : "r"(f1), "r"(f2)
         : "eax",
-#if defined(__amd64) && !defined(__i386__)
+#ifdef __amd64
           "ebx",
 #endif
-          "ecx", "edx", "cc", "memory"
+#if defined(__amd64) || defined(__i386__) && !defined(__linux__)
+          "ecx",
+#endif
+          "edx", "cc", "memory"
     );
 }
 
 uint32_t onlineProcs(void) {
-#if defined(_WIN32)
+#ifdef _WIN32
     return (uint32_t) confProcs();
 #else
     int x; uint32_t cnt; size_t sz = sizeof(cnt);
@@ -98,7 +107,7 @@ uint32_t onlineProcs(void) {
         return (uint32_t) x;
     }
 # endif
-# if !defined(__linux__)
+# ifndef __linux__
     if ((x = sysctlbyname("hw.ncpu", &cnt, &sz, NULL, 0)) != -1 ) {
         return (uint32_t) x;
     }
@@ -114,7 +123,7 @@ uint32_t onlineProcs(void) {
 
 //  Number of OS configured processors
 uint32_t confProcs(void) {
-#if defined(_WIN32)
+#ifdef _WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     return (uint32_t) sysinfo.dwNumberOfProcessors;
