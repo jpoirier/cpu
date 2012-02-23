@@ -12,7 +12,7 @@ import (
 	"unsafe"
 )
 
-var PackageVersion string = "v0.13.2"
+var PackageVersion string = "v0.13.3"
 
 // Processors is the number of physical processors (that plug in to a socket).
 var Processors uint32

@@ -1,7 +1,6 @@
 Description
 ------------
-
-    cpu package reports processor topology information
+    cpu package reports (some) processor topology information
 
     Note that the term package refers to a physical processor
     and system refers to multiple packages. Also, a processor's
@@ -9,17 +8,15 @@ Description
 
 Usage
 -----
-    See main.go for output information and usage
+    See cpu_example.go for output information and usage
 
-Compiling
----------
-    make          builds the package
-    make install  builds and installs the package
-    make example  builds, installs the package, and creates the example program
+Installation
+------------
+    $ go get bitbucket.org/jpoirier/cpu
 
 Testing
 -------
-    run the example program
+    $ go run cpu_example.go
 
 TODO
 ----
@@ -29,14 +26,12 @@ TODO
 Misc
 ----
 - Package refers to a physical processor that plugs in to a socket
-- Core refers to a physical sub-system of a package. A core may contain 1 or more
-  logical processors
-- A logical processor refers to a hardware resource that can execute a single thread
-- Hyper-threading refers to the technology that allows a processor core to provide the
-  functionality of more than one logical core
-- Simultaneous Multi-Threading refers to multiple logical processors within the same core
-- Multi-Core Processor contains more than one physical core
-- MultiProcessor Platform contains multiple physical sockets
-- Hardware Multithreading refers to any combination of hardware support to allow
-  multithreading, which could be any combination of SMT, multi-core, and multi-processor
-- Processor Topology is the hierarchical relationship of shared vs dedicated hardware resources
+- Core refers to a physical sub-system of a package. A core may contain 1 or more logical processors.
+- A logical processor refers to a hardware resource that can execute a single thread.
+- Hyper-threading refers to the technology that allows a processor core to provide the functionality of more than one logical core.
+- Simultaneous Multi-Threading refers to multiple logical processors within the same core.
+- MultiCore Processor contains more than one physical core.
+- MultiProcessor Platform contains multiple physical sockets.
+- Hardware Multithreading refers to any combination of hardware support to allow multithreading, 
+  which could be any combination of SMT, multi-core, and multi-processor.
+- Processor Topology is the hierarchical relationship of shared vs dedicated hardware resources.
