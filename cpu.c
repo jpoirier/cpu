@@ -60,34 +60,25 @@ bool have_cpuid(void) {
 void cpuid(regs_t* r, uint32_t f1, uint32_t f2) {
     __asm__ __volatile__ (
 #ifdef __i386__
-        "pushl %%ebx\n\t"
-# ifdef __linux__
-        "pushl %%ecx\n\t"
-# endif
+        "push %%ebx; push %%edx;"
 #endif
-        "movl %4, %%eax\n\t"
-        "movl %5, %%ecx\n\t"
-        "cpuid\n\t"
-        "movl %%eax, %0\n\t"
-        "movl %%ebx, %1\n\t"
-        "movl %%ecx, %2\n\t"
-        "movl %%edx, %3\n\t"
-#ifdef __i386__
-# ifdef __linux__
-        "popl %%ecx\n\t"
-# endif
-        "popl %%ebx\n\t"
-#endif
-        : "=m"(r->eax), "=m"(r->ebx), "=m"(r->ecx), "=m"(r->edx)
-        : "r"(f1), "r"(f2)
-        : "eax",
 #ifdef __amd64
-          "ebx",
+        "push %%rbx; push %%rdx;"
 #endif
-#if defined(__amd64) || defined(__i386__) && !defined(__linux__)
-          "ecx",
+        "cpuid;"
+        "movl %%eax, 0(%2);"
+        "movl %%ebx, 4(%2);"
+        "movl %%ecx, 8(%2);"
+        "movl %%edx, 12(%2);"
+#ifdef __i386__
+        "pop %%edx; pop %%ebx;"
 #endif
-          "edx", "cc", "memory"
+#ifdef __amd64
+        "pop %%rdx; pop %%rbx;"
+#endif
+        : "=a"(f1), "=c"(f2)
+        : "D"(r), "a"(f1), "c"(f2)
+        : "memory"
     );
 }
 
