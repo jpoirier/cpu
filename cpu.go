@@ -12,7 +12,7 @@ import (
 	"unsafe"
 )
 
-var PackageVersion string = "v0.13.4"
+var PackageVersion string = "v0.14.0"
 
 // Processors is the number of physical processors (that plug in to a socket).
 var Processors uint32
@@ -154,18 +154,10 @@ func Params() {
 	// vendor name
 	var r regs
 	Cpuid(&r, 0, 0)
-	maxStdLevel := r.eax
 	Vendor = utos(r.ebx) + utos(r.edx) + utos(r.ecx)
 
 	Cpuid(&r, 0x80000000, 0)
 	maxExtLevel := r.eax
-
-	// this check includes some old processors (P4 & M, Old Xeon)
-	// that we could report processor name on but probably not
-	// worth the time
-	if maxStdLevel < 5  {
-		return
-	}
 
 	if maxExtLevel >= 0x80000004 {
 		Cpuid(&r, 0x80000002, 0)
@@ -215,7 +207,7 @@ func Params() {
 			PhysicalCoresPkg = pow(2, apicid_sz)
 		}
 	} else {
-// TODO: abort? handle other vendors
+		// TODO: handle other vendors?
 		panic("Unknown processor...")
 	}
 
@@ -223,7 +215,7 @@ func Params() {
 		LogicalProcsPkg = PhysicalCoresPkg // a hardware problem if this happens!
 	} else if (LogicalProcsPkg - PhysicalCoresPkg) > 0 {
 		HyperThreadingEnabled = true
-//		HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
+		//HyperThreadingProcsPkg = LogicalProcsPkg - PhysicalCoresPkg
 		HyperThreadingProcsPkg = PhysicalCoresPkg * (LogicalProcsSharingCache - 1)
 	}
 
