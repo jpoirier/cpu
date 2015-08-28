@@ -12,7 +12,7 @@ Usage
 
 Installation
 ------------
-    $ go get bitbucket.org/jpoirier/cpu
+    $ go get github.com/jpoirier/cpu
 
 Testing
 -------
@@ -32,6 +32,6 @@ Misc
 - Simultaneous Multi-Threading refers to multiple logical processors within the same core.
 - MultiCore Processor contains more than one physical core.
 - MultiProcessor Platform contains multiple physical sockets.
-- Hardware Multithreading refers to any combination of hardware support to allow multithreading, 
+- Hardware Multithreading refers to any combination of hardware support to allow multithreading,
   which could be any combination of SMT, multi-core, and multi-processor.
 - Processor Topology is the hierarchical relationship of shared vs dedicated hardware resources.
